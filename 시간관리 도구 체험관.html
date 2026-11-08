@@ -1,0 +1,1481 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>시간관리 도구 체험관</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --bg:#F2F4F6; --card:#FFFFFF; --fill:#F2F4F6; --fill2:#F9FAFB; --line:#E5E8EB;
+  --t1:#191F28; --t2:#333D4B; --t3:#4E5968; --t4:#8B95A1; --t5:#B0B8C1;
+  --blue:#3182F6; --blue-d:#1B64DA; --blue-w:#E8F3FF; --blue-2:#90C2FF; --blue-3:#C9E2FF;
+  --red:#F04452; --red-w:#FFEEEE;
+  --cat1:#3182F6; --cat2:#90C2FF; --cat3:#8B95A1; --cat4:#D1D6DB;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--t1);font:16px/1.6 "Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;word-break:keep-all}
+button,input,select,textarea{font:inherit;letter-spacing:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:44px;padding:0 18px;border:0;border-radius:12px;background:var(--fill);color:var(--t2);font-size:15px;font-weight:600;cursor:pointer;transition:background .15s,transform .1s;white-space:nowrap}
+.btn:hover{background:#E5E8EB}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--blue);color:#fff}
+.btn.primary:hover{background:var(--blue-d)}
+.btn.weak{background:var(--blue-w);color:var(--blue)}
+.btn.weak:hover{background:var(--blue-3)}
+.btn.danger{background:var(--red-w);color:var(--red)}
+.btn.sm{height:34px;padding:0 12px;font-size:14px;border-radius:10px}
+.btn.lg{height:54px;padding:0 24px;font-size:17px;border-radius:14px}
+.btn.block{width:100%}
+.btn:disabled{background:var(--fill);color:var(--t5);cursor:default;transform:none}
+.x{border:0;background:transparent;color:var(--t5);font-size:20px;line-height:1;width:32px;height:32px;border-radius:8px;cursor:pointer;flex:none}
+.x:hover{background:var(--line);color:var(--t3)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+/* inputs */
+.input,select.input{height:48px;padding:0 14px;border:0;border-radius:12px;background:var(--fill);font-size:15px;min-width:0;width:100%}
+textarea.input{height:auto;padding:12px 14px;min-height:72px;resize:vertical;line-height:1.5}
+.input::placeholder{color:var(--t5)}
+.input:focus{outline:2px solid var(--blue);outline-offset:-2px;background:#fff}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--blue);margin:0;flex:none;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--blue)}
+.addrow{display:grid;grid-template-columns:1fr auto;gap:8px}
+
+/* demo parts */
+.stack{display:grid;gap:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.box{background:var(--fill2);border-radius:16px;padding:18px}
+.box.gray{background:var(--fill)}
+.box.blue{background:var(--blue-w)}
+.label{font-size:13px;color:var(--t4);font-weight:500}
+.sub{color:var(--t3);font-size:14px}
+.hint{color:var(--t4);font-size:13px;margin:0}
+.big{font-size:40px;font-weight:700;line-height:1.1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.mid{font-size:24px;font-weight:700;line-height:1.25;letter-spacing:-.03em}
+.blue-t{color:var(--blue)} .red-t{color:var(--red)} .muted{color:var(--t4)}
+.items{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.item{display:flex;align-items:center;gap:10px;background:var(--fill2);border-radius:12px;padding:10px 8px 10px 14px;min-height:52px}
+.item .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+.item.done .grow{color:var(--t5);text-decoration:line-through}
+.item.on{background:var(--blue-w)}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:6px;background:var(--fill);color:var(--t3);font-size:12px;font-weight:600;white-space:nowrap}
+.tag.blue{background:var(--blue-w);color:var(--blue)}
+.tag.red{background:var(--red-w);color:var(--red)}
+.bar{height:8px;border-radius:4px;background:var(--fill);overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--blue);border-radius:4px;transition:width .3s}
+.bar.red>span{background:var(--red)}
+.seg{display:flex;background:var(--fill);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:transparent;height:38px;border-radius:9px;font-size:14px;font-weight:600;color:var(--t4);cursor:pointer;white-space:nowrap;padding:0 8px}
+.seg button[aria-pressed=true]{background:#fff;color:var(--t1)}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pills button{border:0;height:36px;padding:0 14px;border-radius:999px;background:var(--fill);color:var(--t3);font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.pills button[aria-pressed=true]{background:var(--t1);color:#fff}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.stat{background:var(--fill2);border-radius:14px;padding:14px}
+.stat b{display:block;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.stat span{font-size:13px;color:var(--t4)}
+.fast{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--t4);cursor:pointer;width:max-content}
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.cols2{grid-template-columns:1fr}.big{font-size:34px}}
+
+/* layout: desktop dashboard. left = tool nav, centre = live tool, right = why / origin / prompt */
+.app{display:grid;grid-template-columns:280px minmax(0,1fr) 360px;gap:20px;max-width:1680px;margin:0 auto;padding-block:20px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));align-items:start;min-height:100vh}
+.app.home{grid-template-columns:280px minmax(0,1fr)}
+.panel{background:var(--card);border-radius:20px;padding:28px;min-width:0}
+/* sidebar */
+.side{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto;background:var(--card);border-radius:20px;padding:20px 12px 16px;display:flex;flex-direction:column;gap:14px;scrollbar-width:thin}
+.brand{border:0;background:transparent;text-align:left;padding:4px 8px;cursor:pointer;border-radius:10px}
+.brand b{display:block;font-size:19px;font-weight:800;letter-spacing:-.04em}
+.brand span{font-size:13px;color:var(--t4)}
+.side>*{flex:none}
+.side .input{height:42px;font-size:14px}
+.nav{display:grid;gap:14px}
+.nav h3{margin:0 0 4px;padding:0 10px;font-size:12px;font-weight:600;color:var(--t4)}
+.nl{display:block;padding:8px 10px;border-radius:10px;text-decoration:none;color:var(--t2);font-size:15px;font-weight:500;transition:background .12s}
+.nl:hover{background:var(--fill2)}
+.nl[aria-current=page]{background:var(--blue-w);color:var(--blue);font-weight:700}
+.nav .none{padding:0 10px;font-size:13px;color:var(--t4)}
+/* main */
+.main{display:grid;gap:20px;min-width:0}
+.hero h1{margin:0;font-size:34px;font-weight:800;letter-spacing:-.04em;line-height:1.25}
+.hero > p{margin:10px 0 0;color:var(--t3);font-size:16px;max-width:42em}
+.hero-row{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
+.how{background:var(--fill2);border-radius:16px;padding:18px 20px}
+.how b{font-size:15px}
+.how ol{margin:8px 0 0;padding-left:18px;color:var(--t3);font-size:14px;display:grid;gap:4px}
+.how p{margin:10px 0 0}
+.worry{margin-top:22px}
+.worry .label{display:block;margin-bottom:10px}
+.groups{display:grid;gap:20px}
+.group h2{margin:0 0 4px;font-size:20px;font-weight:700;letter-spacing:-.03em}
+.group > p{margin:0 0 16px;color:var(--t4);font-size:14px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.tcard{display:grid;gap:6px;align-content:start;padding:18px 18px 20px;border-radius:16px;background:var(--fill2);text-decoration:none;color:inherit;transition:background .15s,transform .15s}
+.tcard:hover{background:var(--blue-w);transform:translateY(-2px)}
+.tcard b{font-size:17px;font-weight:700;letter-spacing:-.03em}
+.tcard span{font-size:14px;color:var(--t3);line-height:1.5}
+.empty{text-align:center;color:var(--t4);padding:40px 0}
+/* detail */
+.d-head .stage{font-size:14px;font-weight:600;color:var(--blue)}
+.d-head h1{margin:2px 0 0;font-size:32px;font-weight:800;letter-spacing:-.04em;line-height:1.25}
+.d-head p{margin:10px 0 0;color:var(--t3);font-size:16px;line-height:1.65;max-width:46em}
+.d-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.navbtns{display:flex;gap:6px;flex:none}
+.reset{margin-top:16px;border:0;background:transparent;color:var(--t4);font-size:13px;cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:3px}
+/* right rail */
+.rail{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto;display:grid;gap:12px;scrollbar-width:thin}
+.rail .panel{padding:22px}
+.rail h2{margin:0 0 8px;font-size:16px;font-weight:700}
+.rail p{margin:0;color:var(--t2);font-size:14px;line-height:1.7}
+.rail .oname{font-size:16px;display:block;margin-bottom:6px}
+.prompt{background:var(--fill);border-radius:14px;padding:16px;margin-top:4px}
+.prompt p{margin:0 0 14px;color:var(--t1)}
+.looks-h{margin:16px 0 6px;font-size:15px;font-weight:700}
+.parts{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.part{display:flex;gap:12px;align-items:flex-start;width:100%;border:0;background:transparent;text-align:left;padding:8px;border-radius:12px;cursor:pointer;transition:background .12s}
+.part:hover,.part.on{background:var(--blue-w)}
+.th{width:64px;height:46px;flex:none;border-radius:10px;background:var(--fill);display:grid;place-items:center;overflow:hidden}
+.th i{display:block;font-style:normal;flex:none}
+.pt{display:grid;gap:2px;min-width:0}
+.pn{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pn b{font-size:15px}
+.pw{color:var(--t3);font-size:13px;line-height:1.5}
+.pmiss{color:var(--red);font-size:12px}
+.hl{outline:3px solid var(--blue)!important;outline-offset:3px;border-radius:8px;animation:hlp 1s ease-in-out 3}
+@keyframes hlp{50%{outline-color:var(--blue-2)}}
+.mback{display:none}
+@media (max-width:1240px){
+  .app{grid-template-columns:260px minmax(0,1fr)}
+  .rail{position:static;max-height:none;grid-column:2;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .hero-row{grid-template-columns:1fr}
+}
+@media (max-width:820px){
+  .app,.app.home{grid-template-columns:minmax(0,1fr);padding-block:12px}
+  .side{position:static;max-height:none}
+  .app:not(.home) .side{display:none}
+  .rail{grid-column:1}
+  .mback{display:inline-flex}
+  .panel{padding:20px}
+  .hero h1{font-size:28px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<style>:root{--dp1:#3182F6;--dp2:#90C2FF;--dp3:#B0B8C1;--dp4:#DDE1E5;--dp5:#F04452;
+  --wk0:#3182F6;--wk1:#90C2FF;--wk2:#4E5968;--wk3:#B0B8C1;--wk4:#E5E8EB}
+.input.flat{background:transparent;height:40px;padding:0;font-size:17px;font-weight:600}
+.input.flat:focus{background:transparent;outline:none;box-shadow:inset 0 -2px 0 var(--blue)}
+.red-box{background:var(--red-w)}
+/* capture */
+.item.cap,.item.wait{flex-wrap:wrap}
+.acts{display:flex;gap:4px;flex:none}
+@media (max-width:520px){.item.cap .acts,.item.wait .acts{width:100%;justify-content:flex-end}}
+.bins{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:600px){.bins{grid-template-columns:1fr}}
+.mini{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:2px;font-size:14px}
+.mini li{display:flex;align-items:center;gap:4px;justify-content:space-between;color:var(--t2)}
+.mini li span{min-width:0;overflow-wrap:anywhere}
+.mini li.gone span{color:var(--t5);text-decoration:line-through}
+.mini .x{font-size:15px;width:28px;height:28px}
+/* waiting */
+.wait-f{display:grid;grid-template-columns:150px 1fr auto;gap:8px}
+@media (max-width:520px){.wait-f{grid-template-columns:1fr 1fr}.wait-f .btn{grid-column:1/-1}}
+/* goals */
+.goal .pct{width:48px;text-align:right}
+.goal .st{margin-top:6px}
+/* matrix */
+.mx-f{display:grid;grid-template-columns:1fr 150px auto;gap:8px}
+@media (max-width:520px){.mx-f{grid-template-columns:1fr auto}.mx-f input{grid-column:1/-1}}
+.quads{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:600px){.quads{grid-template-columns:1fr}}
+.quad{background:var(--fill2);border-radius:16px;padding:14px;display:grid;gap:10px;align-content:start;min-height:150px;transition:box-shadow .15s}
+.quad.target{box-shadow:inset 0 0 0 2px var(--blue-2);cursor:pointer}
+.quad .item{background:#fff;min-height:44px;padding:6px 4px 6px 10px}
+.quad .item.on{background:var(--blue-w)}
+.txt{border:0;background:transparent;text-align:left;padding:4px 0;cursor:pointer;font-size:15px}
+/* nine */
+.slot{display:flex;gap:12px;align-items:center;background:var(--fill2);border-radius:12px;padding:4px 14px;cursor:text}
+.slot-t{flex:1;min-width:0;border:0;background:transparent;height:44px;font-size:15px}
+.slot-t:focus{outline:none}
+.slot:focus-within{box-shadow:inset 0 0 0 2px var(--blue)}
+.slot.done .slot-t{color:var(--t5);text-decoration:line-through}
+.slot.big1{background:var(--blue-w);padding:10px 16px}
+.slot.big1 .slot-t{font-size:19px;font-weight:700;height:48px}
+/* breakdown */
+.goal-in{font-size:18px;font-weight:700}
+/* dayplan */
+.dp{display:grid;grid-template-columns:52px 1fr 1fr;gap:3px;user-select:none;-webkit-user-select:none}
+.dp-h{border:0;background:transparent;font-size:13px;color:var(--t4);border-radius:8px;cursor:pointer;font-variant-numeric:tabular-nums}
+.dp-h:hover{background:var(--fill)}
+.dp-h[aria-pressed=true]{background:var(--blue-w);color:var(--blue);font-weight:700}
+.dp-s{height:34px;border-radius:7px;background:var(--fill);cursor:crosshair;touch-action:none;font-size:12px;font-weight:600;padding:0 8px;line-height:34px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dp-s[data-c="1"]{background:var(--dp1);color:#fff}
+.dp-s[data-c="2"]{background:var(--dp2);color:#0B3D91}
+.dp-s[data-c="3"]{background:var(--dp3);color:#fff}
+.dp-s[data-c="4"]{background:var(--dp4);color:var(--t3)}
+.dp-s[data-c="5"]{background:var(--red-w);color:var(--red);box-shadow:inset 3px 0 0 var(--red)}
+.dp-s.now{outline:2px solid var(--t1);outline-offset:1px}
+/* weekly */
+.wk-today{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.wk-today div{display:grid;gap:2px}
+.wk-today b{font-size:18px}
+.wk{display:grid;grid-template-columns:40px repeat(7,minmax(0,1fr));gap:4px}
+.wk-d{text-align:center;font-size:13px;color:var(--t4);font-weight:600}
+.wk-d.on{color:var(--blue)}
+.wk-p{font-size:12px;color:var(--t4);display:flex;align-items:center}
+.wk-c{border:0;height:56px;border-radius:10px;background:var(--fill);font-size:12px;font-weight:600;cursor:pointer;padding:2px;overflow:hidden;word-break:keep-all;line-height:1.3}
+.wk-c[data-s="0"]{background:var(--wk0);color:#fff}
+.wk-c[data-s="1"]{background:var(--wk1);color:#0B3D91}
+.wk-c[data-s="2"]{background:var(--wk2);color:#fff}
+.wk-c[data-s="3"]{background:var(--wk3);color:#fff}
+.wk-c[data-s="4"]{background:var(--wk4);color:var(--t3)}
+/* backward */
+.bw .days{width:64px;height:40px;text-align:center;padding:0 6px}
+.bw-f{display:grid;grid-template-columns:1fr 80px auto;gap:8px}
+/* timer */
+.tm{display:grid;justify-items:center;gap:18px;padding:28px 18px}
+.ring{position:relative;width:min(240px,64vw);aspect-ratio:1}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+#arc{transition:stroke-dashoffset .25s linear}
+.ring-t{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring-t b{font-size:clamp(40px,12vw,52px);font-weight:700;letter-spacing:-.03em;line-height:1}
+.ring-t span{font-size:14px;color:var(--t4);margin-top:8px}
+.tm-after{background:#fff;text-align:center;width:100%}
+/* openclose */
+.off{text-align:center;padding:32px 20px}
+/* cowork */
+.room{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:560px){.room{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.seat{background:var(--fill2);border-radius:14px;padding:14px;display:grid;gap:4px;min-width:0}
+.seat.away{opacity:.55}
+.seat.me{background:var(--blue-w)}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--blue);display:inline-block;animation:pulse 2s infinite}
+.away .sdot,.sdot.off{background:var(--t5);animation:none}
+@keyframes pulse{50%{opacity:.3}}
+/* tracker */
+.trk{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.trk-b{border:0;background:var(--fill2);border-radius:14px;padding:16px;display:grid;gap:6px;justify-items:start;text-align:left;cursor:pointer;transition:background .15s}
+.trk-b:hover{background:var(--fill)}
+.trk-b .num{color:var(--t4);font-size:14px}
+.trk-b.on{background:var(--blue);color:#fff}
+.trk-b.on .num{color:#fff}
+.trk-b.on .dot{background:#fff!important}
+.tl{position:relative;height:28px;background:var(--fill);border-radius:8px;overflow:hidden}
+.tl span{position:absolute;top:0;bottom:0}
+.ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--t4);margin-top:4px}
+/* streak */
+.scwrap{overflow-x:auto;padding:4px 2px}
+.scg{display:flex;gap:6px;width:max-content}
+.scd{display:grid;grid-template-rows:repeat(7,14px);gap:3px;font-size:10px;color:var(--t4);line-height:14px}
+.sc-grid{display:grid;grid-template-rows:repeat(7,14px);grid-auto-flow:column;grid-auto-columns:14px;gap:3px}
+.sc{width:14px;height:14px;border-radius:4px;border:0;padding:0;background:#E5E8EB;cursor:pointer}
+.sc.on{background:var(--blue)}
+.sc.td{box-shadow:0 0 0 2px var(--t1)}
+.sc.fut{visibility:hidden}
+/* done */
+.dbars{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;align-items:end;height:130px;margin-top:10px}
+.dbars div{display:grid;gap:4px;justify-items:center;align-self:end}
+.dbars span{width:100%;max-width:30px;background:var(--blue-2);border-radius:6px}
+.dbars .td span{background:var(--blue)}
+.dbars small{font-size:12px;color:var(--t4)}
+/* condition */
+.cd-row{display:grid;grid-template-columns:70px minmax(0,1fr) 82px 66px;gap:10px;align-items:center;border:0;background:transparent;border-radius:10px;padding:8px;cursor:pointer;text-align:left}
+.cd-row:hover{background:var(--fill2)}
+.cd-row.on{background:var(--blue-w)}
+.cd-row .tag{justify-content:center}
+.cd-bar{height:10px;background:var(--fill);border-radius:5px;overflow:hidden}
+.cd-bar span{display:block;height:100%;background:var(--blue);border-radius:5px}
+.cd-bar span.short{background:var(--red)}
+@media (max-width:520px){.cd-row{grid-template-columns:58px minmax(0,1fr) 70px 58px;gap:6px}}
+/* estimate */
+.est-f{display:grid;grid-template-columns:1fr 90px 90px auto;gap:8px}
+@media (max-width:520px){.est-f{grid-template-columns:1fr 1fr}.est-f input:first-child,.est-f .btn{grid-column:1/-1}}
+/* review */
+.rv-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:600px){.rv-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpt{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:start}
+@media (max-width:640px){.kpt{grid-template-columns:1fr}}
+.kc{display:grid;gap:10px}
+.kc .item{background:#fff;min-height:44px;flex-wrap:wrap;font-size:14px}
+.kc .input{background:#fff;height:42px}
+.stack>*{min-width:0}
+.btn.block{white-space:normal;height:auto;min-height:44px;padding-block:10px;line-height:1.4}
+.btn.lg.block{min-height:54px}
+</style>
+</head>
+<body>
+<div class="app home" id="app">
+  <aside class="side" aria-label="도구 목록">
+    <button class="brand" id="brand"><b>시간관리 도구 체험관</b><span>도구 <span class="num" id="total"></span>가지</span></button>
+    <input class="input" id="q" type="search" placeholder="도구 이름으로 찾기" aria-label="도구 검색">
+    <nav class="nav" id="nav"></nav>
+  </aside>
+
+  <main class="main">
+    <div id="home" class="stack" style="gap:20px">
+      <section class="panel hero">
+        <div class="hero-row">
+          <div>
+            <h1>어떤 고민부터 풀어볼까요?</h1>
+            <p>사람들이 실제로 쓰는 시간관리 방법을 직접 눌러서 써볼 수 있어요. 고민을 고르면 맞는 도구만 남아요. 도구마다 AI에게 그대로 부탁할 문장도 있어요.</p>
+            <div class="worry"><span class="label">요즘 내 고민은</span><div class="pills" id="worries" role="group" aria-label="요즘 내 고민"></div></div>
+          </div>
+          <div class="how"><b>체험하고 나서</b><ol><li>제일 손이 많이 간 도구 하나를 골라요.</li><li>오른쪽 'AI에게 이렇게 말해보세요' 문장을 복사해 Claude에게 보내요.</li><li>칸 이름이나 문구를 내 일에 맞게 바꿔 달라고 이어서 말해요.</li></ol><p class="hint">입력한 내용은 이 브라우저에만 저장돼요.</p></div>
+        </div>
+      </section>
+      <div class="groups" id="groups"></div>
+    </div>
+
+    <div id="detail" class="stack" style="gap:20px" hidden>
+      <section class="panel d-head">
+        <div class="d-top"><div class="stage" id="d-stage"></div><div class="navbtns"><button class="btn sm mback" id="back">‹ 목록</button><button class="btn sm" id="prev" aria-label="이전 도구">‹ 이전</button><button class="btn sm" id="next" aria-label="다음 도구">다음 ›</button></div></div>
+        <h1 id="d-title"></h1>
+        <p id="d-lede"></p>
+      </section>
+      <section class="panel">
+        <div id="demo"></div>
+        <button class="reset" id="reset">예시 지우고 처음부터</button>
+      </section>
+    </div>
+  </main>
+
+  <aside class="rail" id="rail" hidden>
+    <section class="panel"><h2>AI에게 이렇게 말해보세요</h2><div class="prompt"><p id="d-prompt"></p><button class="btn primary block" id="copy">문장 복사하기</button></div></section>
+    <section class="panel"><h2>이 화면에 쓰인 부품</h2><p class="hint" style="margin-bottom:12px">이름을 누르면 체험 화면에서 그 부품을 찾아 보여줘요. AI에게 말할 때 이 이름을 쓰면 원하는 모양이 정확히 나와요.</p><ul class="parts" id="d-parts"></ul></section>
+    <section class="panel"><h2>왜 효과가 있나요</h2><p id="d-why"></p></section>
+    <section class="panel"><h2>원래 이름은</h2><b class="oname" id="d-oname"></b><p class="sub" id="d-origin"></p><h3 class="looks-h">비슷한 것</h3><p class="sub" id="d-looks"></p></section>
+  </aside>
+</div>
+
+<script>
+/* ---------- shared helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('mytt2-' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('mytt2-' + k, JSON.stringify(v)); } catch (e) {} }
+};
+const pad = n => String(n).padStart(2, '0');
+const dkey = (d = new Date()) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const ago = n => dkey(addDays(new Date(), -n));
+const parseD = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const today0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+const daysBetween = (a, b) => Math.round((parseD(b) - parseD(a)) / 864e5);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+const mmss = s => { s = Math.max(0, Math.ceil(s)); return pad(Math.floor(s / 60)) + ':' + pad(s % 60); };
+const hhmm = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+const hm = m => { m = Math.round(m); const h = Math.floor(m / 60); return h ? `${h}시간${m % 60 ? ' ' + (m % 60) + '분' : ''}` : `${m}분`; };
+const WD = ['일', '월', '화', '수', '목', '금', '토'];
+const mondayOf = (d = new Date()) => { const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x; };
+let _ac = null;
+function unlockAudio() { try { _ac = _ac || new (window.AudioContext || window.webkitAudioContext)(); _ac.resume(); } catch (e) {} }
+function chime(n = 2, f = 880) {
+  try { unlockAudio(); for (let i = 0; i < n; i++) { const t = _ac.currentTime + i * .22, o = _ac.createOscillator(), g = _ac.createGain(); o.frequency.value = f; g.gain.setValueAtTime(.14, t); g.gain.exponentialRampToValueAtTime(.001, t + .18); o.connect(g).connect(_ac.destination); o.start(t); o.stop(t + .2); } } catch (e) {}
+}
+/* timers registered by a tool are cleared when you leave its page */
+let _timers = [];
+const every = (fn, ms) => { const id = setInterval(fn, ms); _timers.push(id); return id; };
+const clearTimers = () => { _timers.forEach(clearInterval); _timers = []; if (window._stopSound) window._stopSound(); };
+function Clock(o) { /* countdown when o.from given, otherwise counts up */
+  let v = o.from ?? 0, last = 0, id = null;
+  const sp = () => (o.speed ? o.speed() : 1), down = o.from != null;
+  const api = {
+    get v() { return v; }, get running() { return !!id; },
+    start() { if (id) return; unlockAudio(); last = Date.now(); id = every(() => { const n = Date.now(), d = (n - last) / 1000 * sp(); last = n; v += down ? -d : d; if (down && v <= 0) { v = 0; api.stop(); o.tick && o.tick(0); o.done && o.done(); } else o.tick && o.tick(v); }, 200); },
+    stop() { clearInterval(id); id = null; },
+    set(x) { api.stop(); v = x; o.tick && o.tick(v); }
+  };
+  return api;
+}
+const TOOLS = [];
+const tool = t => TOOLS.push(t);
+</script>
+<script>/* ========== 담기 ========== */
+tool({
+  slug: 'capture', stage: '담기', title: '생각 수집함',
+  desc: '머릿속 생각을 전부 적고 할 일, 나중에, 버리기로 나눠요.',
+  tags: ['뭐부터 할지 모름', '집중이 안 됨', '쉬지를 못함'],
+  lede: '떠오르는 걸 생각나는 대로 전부 적어요. 다 적고 나면 하나씩 할 일, 나중에, 버리기로 나눠요. 일하다 딴생각이 떠올라도 여기 적어두고 바로 원래 일로 돌아오면 돼요.',
+  why: '끝내지 못한 일은 머릿속에 남아서 계속 신경을 잡아먹어요. 언제 다시 볼지 정해서 적어두기만 해도 그 생각이 덜 떠오른다는 연구가 있어요. 나누다 보면 지금 당장 할 일은 생각보다 몇 개 안 된다는 것도 보여요.',
+  oname: '브레인 덤프',
+  origin: '데이비드 앨런의 시간관리법 GTD(Getting Things Done)에서 첫 단계인 수집을 부르는 말이에요. 머릿속 생각을 밖으로 쏟아낸다(dump)는 뜻이에요.',
+  prompt: '생각 수집함 HTML을 만들어줘. 입력칸에 떠오른 생각을 쓰고 Enter를 치면 \'분류 전\' 목록에 쌓이게 해줘. 항목마다 \'할 일\', \'나중에\', \'버리기\' 버튼이 있어서 누르면 아래 세 바구니로 옮겨지게 해줘. 바구니마다 개수를 보여주고 브라우저를 껐다 켜도 남아 있게 해줘.',
+  seed: () => ({ items: ['다음 주 외주 마감 걱정', '부가세 신고 언제였지', '엄마 생신 선물', '새 작업 아이디어: 동네 고양이 시리즈', '프린터 잉크 사기', '운동 다시 시작하고 싶다'].map((t, i) => ({ id: uid(), t, b: i === 1 ? 't' : i === 4 ? 'l' : null })) }),
+  empty: () => ({ items: [] }),
+  render(el, S, save) {
+    const BINS = [['t', '할 일'], ['l', '나중에'], ['x', '버린 것']];
+    const draw = () => {
+      const un = S.items.filter(i => !i.b);
+      el.innerHTML = `<div class="stack">
+        <form class="addrow" id="f"><input class="input" placeholder="떠오른 생각을 적고 Enter" aria-label="생각"><button class="btn primary">담기</button></form>
+        <div class="label">분류 전 ${un.length}개</div>
+        <ul class="items">${un.map(i => `<li class="item cap" data-id="${i.id}"><span class="grow">${esc(i.t)}</span><span class="acts"><button class="btn sm weak" data-b="t">할 일</button><button class="btn sm" data-b="l">나중에</button><button class="btn sm" data-b="x">버리기</button></span></li>`).join('') || '<li class="hint" style="padding:6px 2px">다 나눴어요. 머릿속이 좀 가벼워졌나요?</li>'}</ul>
+        <div class="bins">${BINS.map(([k, n]) => { const L = S.items.filter(i => i.b === k); return `<div class="box"><div class="row between"><b>${n}</b><span class="num muted">${L.length}</span></div><ul class="mini">${L.map(i => `<li data-id="${i.id}" class="${k === 'x' ? 'gone' : ''}"><span>${esc(i.t)}</span><button class="x" data-undo aria-label="분류 취소">↺</button></li>`).join('')}</ul></div>`; }).join('')}</div>
+      </div>`;
+    };
+    el.onsubmit = e => { e.preventDefault(); const inp = $('#f input', el), v = inp.value.trim(); if (!v) return; S.items.push({ id: uid(), t: v, b: null }); save(); draw(); $('#f input', el).focus(); };
+    el.onclick = e => {
+      const li = e.target.closest('[data-id]'); if (!li) return; const it = S.items.find(i => i.id === li.dataset.id);
+      const b = e.target.closest('[data-b]');
+      if (b) it.b = b.dataset.b; else if (e.target.closest('[data-undo]')) it.b = null; else return;
+      save(); draw();
+    };
+    draw();
+  }
+});
+
+tool({
+  slug: 'waiting', stage: '담기', title: '답장 대기함',
+  desc: '누구에게 뭘 기다리는지 적어두면 며칠째인지 세어줘요.',
+  tags: ['시간 감각이 없음', '뭐부터 할지 모름'],
+  lede: '내가 보낸 뒤 상대 답을 기다리는 일을 모아두는 곳이에요. 며칠째 기다리는지 세어주고 3일이 넘으면 연락해볼 때라고 알려줘요.',
+  why: '혼자 일하면 클라이언트 피드백이나 견적 답장을 기다리느라 일이 멈추는 날이 많아요. 기다리는 일을 머릿속에만 두면 잊어버리거나 반대로 계속 신경이 쓰여요. 며칠째인지 숫자로 보이면 언제 연락할지 정하기 쉬워져요.',
+  oname: '대기 목록 (Waiting For)',
+  origin: 'GTD에서 남에게 넘긴 일을 따로 모아두는 목록 이름이에요. 내 할 일 목록과 섞지 않고 따로 두는 게 핵심이에요.',
+  prompt: '답장 대기함 HTML을 만들어줘. \'누구에게\'와 \'무엇을\' 적고 추가하면 오늘 날짜로 목록에 들어가게 해줘. 항목마다 며칠째 기다리는지 보여주고 3일이 넘으면 빨간색으로 \'연락해볼 때\'라고 표시해줘. \'받았어요\'를 누르면 목록에서 빠지고, \'연락했어요\'를 누르면 날짜가 오늘로 다시 시작되게 해줘.',
+  seed: () => ({ got: 4, items: [{ id: uid(), who: '출판사 김 편집자', what: '표지 시안 피드백', since: ago(5) }, { id: uid(), who: '카페 사장님', what: '메뉴판 견적 회신', since: ago(3) }, { id: uid(), who: '세무사', what: '부가세 서류 확인', since: ago(1) }] }),
+  empty: () => ({ got: 0, items: [] }),
+  render(el, S, save) {
+    const draw = () => {
+      const tk = dkey(), L = S.items.slice().sort((a, b) => a.since < b.since ? -1 : 1);
+      const late = L.filter(i => daysBetween(i.since, tk) >= 3).length;
+      el.innerHTML = `<div class="stack">
+        <div class="stats"><div class="stat"><b>${L.length}</b><span>기다리는 일</span></div><div class="stat"><b class="${late ? 'red-t' : ''}">${late}</b><span>연락해볼 일</span></div><div class="stat"><b>${S.got}</b><span>받은 답</span></div></div>
+        <form class="wait-f" id="f"><input class="input" name="who" placeholder="누구에게" aria-label="누구에게"><input class="input" name="what" placeholder="무엇을 기다리나요" aria-label="무엇을"><button class="btn primary">추가</button></form>
+        <ul class="items">${L.map(i => { const n = daysBetween(i.since, tk); return `<li class="item wait" data-id="${i.id}"><span class="grow"><b>${esc(i.who)}</b> <span class="sub">${esc(i.what)}</span><br><span class="tag ${n >= 3 ? 'red' : ''}" style="margin-top:6px">${n === 0 ? '오늘 보냄' : n + '일째'}${n >= 3 ? ' · 연락해볼 때' : ''}</span></span><span class="acts"><button class="btn sm" data-a="nudge">연락했어요</button><button class="btn sm weak" data-a="got">받았어요</button></span></li>`; }).join('') || '<li class="hint" style="padding:6px 2px">기다리는 일이 없어요.</li>'}</ul>
+      </div>`;
+    };
+    el.onsubmit = e => { e.preventDefault(); const f = e.target, who = f.who.value.trim(), what = f.what.value.trim(); if (!who || !what) return; S.items.push({ id: uid(), who, what, since: dkey() }); save(); draw(); };
+    el.onclick = e => {
+      const b = e.target.closest('[data-a]'); if (!b) return; const id = b.closest('[data-id]').dataset.id, it = S.items.find(i => i.id === id);
+      if (b.dataset.a === 'got') { S.items = S.items.filter(i => i !== it); S.got++; chime(1, 700); } else it.since = dkey();
+      save(); draw();
+    };
+    draw();
+  }
+});
+
+/* ========== 고르기 ========== */
+tool({
+  slug: 'goals', stage: '고르기', title: '분기 목표판',
+  desc: '3개월 목표 세 개를 늘 띄워두고 시간과 진행률을 비교해요.',
+  tags: ['시간 감각이 없음', '성취감이 없음'],
+  lede: '이번 분기(3개월) 안에 이룰 목표를 세 개까지 적어요. 분기가 얼마나 지났는지와 목표가 얼마나 진행됐는지를 나란히 보여줘서 지금 속도가 맞는지 바로 알 수 있어요.',
+  why: '1년 목표는 연말이 멀게 느껴져서 미루기 쉬워요. 3개월로 끊으면 마감이 가까워지고 매주 해야 할 양이 분명해져요. 지나간 시간과 진행률을 같이 보면 "아직 괜찮겠지" 하는 착각이 줄어요.',
+  oname: '12주 목표',
+  origin: '브라이언 모런의 책 『위대한 12주』에서 나온 방식이에요. 1년 목표는 너무 멀어서 12주(약 한 분기)를 한 해처럼 쓰라고 권해요.',
+  prompt: '분기 목표판 HTML을 만들어줘. 맨 위에 이번 분기가 몇 % 지났는지와 남은 날짜를 막대로 보여줘. 그 아래에 목표를 최대 3개 적을 수 있고, 목표마다 진행률을 슬라이더로 정하게 해줘. 진행률이 지나간 시간보다 10% 넘게 뒤처지면 빨간색으로 알려줘.',
+  seed: () => ({ goals: [{ id: uid(), t: '시간표 클래스 2기 모집 20명', p: 40 }, { id: uid(), t: '포트폴리오 새 작업 5개', p: 60 }, { id: uid(), t: '외주 수입 월 300만 원 맞추기', p: 70 }] }),
+  empty: () => ({ goals: [] }),
+  render(el, S, save) {
+    const n = new Date(), qm = Math.floor(n.getMonth() / 3) * 3, qs = new Date(n.getFullYear(), qm, 1), qe = new Date(n.getFullYear(), qm + 3, 1);
+    const tp = Math.round((n - qs) / (qe - qs) * 100), left = Math.ceil((qe - n) / 864e5);
+    const status = g => g.p >= tp - 10 ? `<span class="tag blue">속도 괜찮아요</span>` : `<span class="tag red">시간보다 ${tp - g.p}% 뒤처져요</span>`;
+    const draw = () => {
+      el.innerHTML = `<div class="stack">
+        <div class="box gray"><div class="label">${n.getFullYear()}년 ${qm / 3 + 1}분기 · ${qm + 1}월~${qm + 3}월</div><div class="mid" style="margin:4px 0 12px">시간이 <span class="blue-t">${tp}%</span> 지났어요</div><div class="bar"><span style="width:${tp}%"></span></div><p class="hint" style="margin-top:8px">분기 끝까지 ${left}일 남았어요</p></div>
+        ${S.goals.map((g, i) => `<div class="box goal" data-i="${i}"><div class="row" style="flex-wrap:nowrap"><input class="input flat" value="${esc(g.t)}" data-t aria-label="목표 ${i + 1}"><button class="x" data-del aria-label="삭제">×</button></div>
+          <div class="row" style="flex-wrap:nowrap;margin-top:10px"><input type="range" min="0" max="100" step="5" value="${g.p}" data-p aria-label="진행률"><b class="num pct">${g.p}%</b></div><div class="st">${status(g)}</div></div>`).join('')}
+        ${S.goals.length < 3 ? '<button class="btn block" id="add">+ 목표 추가</button>' : '<p class="hint">목표는 세 개까지만 둘 수 있어요. 많을수록 흐려져요.</p>'}
+      </div>`;
+    };
+    el.oninput = e => {
+      const box = e.target.closest('.goal'); if (!box) return; const g = S.goals[+box.dataset.i];
+      if (e.target.matches('[data-t]')) g.t = e.target.value;
+      if (e.target.matches('[data-p]')) { g.p = +e.target.value; $('.pct', box).textContent = g.p + '%'; $('.st', box).innerHTML = status(g); }
+      save();
+    };
+    el.onclick = e => {
+      if (e.target.id === 'add') { S.goals.push({ id: uid(), t: '', p: 0 }); save(); draw(); $$('[data-t]', el).pop().focus(); return; }
+      const d = e.target.closest('[data-del]'); if (!d) return; S.goals.splice(+d.closest('.goal').dataset.i, 1); save(); draw();
+    };
+    draw();
+  }
+});
+
+tool({
+  slug: 'matrix', stage: '고르기', title: '급한 일·중요한 일 나누기',
+  desc: '할 일을 급한지, 중요한지 따져서 네 칸에 나눠 담아요.',
+  tags: ['뭐부터 할지 모름'],
+  lede: '할 일마다 "급한가?"와 "중요한가?" 두 가지만 물어보고 네 칸 중 하나에 넣어요. 칸마다 할 행동이 정해져 있어서 고민할 게 줄어요.',
+  why: '할 일이 쌓이면 전부 똑같이 급하게 느껴져요. 칸에 나눠보면 지금 당장 할 일은 몇 개 안 되고, 진짜 중요한 일은 대부분 "안 급한" 칸에 있어요. 그 칸에 시간을 먼저 떼어두는 게 이 방법의 핵심이에요.',
+  oname: '아이젠하워 매트릭스',
+  origin: '미국 대통령 아이젠하워가 "급한 일은 대개 중요하지 않고, 중요한 일은 대개 급하지 않다"고 한 말에서 왔어요. 스티븐 코비가 『성공하는 사람들의 7가지 습관』에서 이 말을 네 칸 표로 정리해서 널리 알려졌어요.',
+  prompt: '급한 일과 중요한 일을 나누는 4칸 표 HTML을 만들어줘. 칸 이름은 \'지금 하기(급하고 중요함)\', \'일정 잡기(중요하지만 안 급함)\', \'짧게 처리(급하지만 덜 중요함)\', \'버리기(둘 다 아님)\'로 해줘. 할 일을 입력하고 칸을 골라 넣을 수 있게, 체크하면 완료 표시가 되게, 할 일을 누른 뒤 다른 칸을 누르면 옮겨지게 해줘.',
+  seed: () => ({ tasks: [['내일 마감인 외주 수정본 보내기', 1], ['세금계산서 발행', 1], ['포트폴리오 새 작업 정리', 2], ['주 3회 운동 루틴 짜기', 2], ['다음 달 작업 계획', 2], ['단톡방 답장', 3], ['택배 반품 접수', 3], ['알림 온 쇼핑몰 둘러보기', 4]].map(([t, q]) => ({ id: uid(), t, q, d: false })) }),
+  empty: () => ({ tasks: [] }),
+  render(el, S, save) {
+    const Q = { 1: ['지금 하기', '급하고 중요함', 'red'], 2: ['일정 잡기', '중요하지만 안 급함', 'blue'], 3: ['짧게 처리', '급하지만 덜 중요함', ''], 4: ['버리기', '둘 다 아님', ''] };
+    let sel = null;
+    const draw = () => {
+      el.innerHTML = `<div class="stack">
+        <form class="mx-f" id="f"><input class="input" placeholder="할 일 (예: 포트폴리오 사진 고르기)" aria-label="할 일"><select class="input" aria-label="칸 선택">${[1, 2, 3, 4].map(q => `<option value="${q}">${Q[q][0]}</option>`).join('')}</select><button class="btn primary">추가</button></form>
+        <p class="hint">${sel ? '옮길 칸을 누르세요. 같은 할 일을 다시 누르면 취소돼요.' : '할 일을 누른 다음 다른 칸을 누르면 옮겨져요.'}</p>
+        <div class="quads">${[1, 2, 3, 4].map(q => `<section class="quad ${sel ? 'target' : ''}" data-q="${q}"><div class="row between"><b>${Q[q][0]}</b><span class="tag ${Q[q][2]}">${Q[q][1]}</span></div><ul class="items">${S.tasks.filter(t => t.q === q).map(t => `<li class="item ${t.d ? 'done' : ''} ${t.id === sel ? 'on' : ''}" data-id="${t.id}"><input type="checkbox" ${t.d ? 'checked' : ''} aria-label="완료"><button class="grow txt">${esc(t.t)}</button><button class="x" data-del aria-label="삭제">×</button></li>`).join('')}</ul></section>`).join('')}</div>
+      </div>`;
+    };
+    el.onsubmit = e => { e.preventDefault(); const v = $('#f input', el).value.trim(); if (!v) return; S.tasks.push({ id: uid(), t: v, q: +$('#f select', el).value, d: false }); save(); draw(); };
+    el.onclick = e => {
+      const li = e.target.closest('li[data-id]'), t = li && S.tasks.find(x => x.id === li.dataset.id);
+      if (t && e.target.matches('input')) { t.d = e.target.checked; save(); draw(); return; }
+      if (t && e.target.closest('[data-del]')) { S.tasks = S.tasks.filter(x => x !== t); save(); draw(); return; }
+      if (t && e.target.closest('.txt')) { sel = sel === t.id ? null : t.id; draw(); return; }
+      const q = e.target.closest('.quad'); if (q && sel) { S.tasks.find(x => x.id === sel).q = +q.dataset.q; sel = null; save(); draw(); }
+    };
+    draw();
+  }
+});
+
+tool({
+  slug: 'nine', stage: '고르기', title: '하루 9칸 할 일',
+  desc: '큰 일 1개, 중간 일 3개, 작은 일 5개만 정해요.',
+  tags: ['뭐부터 할지 모름', '시작이 어려움'],
+  lede: '하루에 할 수 있는 양을 미리 9칸으로 정해둔 틀이에요. 큰 일 1개, 중간 일 3개, 작은 일 5개. 칸이 모자라면 오늘 할 일이 아니라는 뜻이에요. 큰 일 1칸은 아침에 가장 먼저 해치워요.',
+  why: '할 일 목록에 한도가 없으면 늘 다 못 끝내고 하루를 실패처럼 마무리하게 돼요. 칸 수를 정해두면 넣을 일을 고르면서 우선순위가 저절로 정해지고, 다 채웠을 때 오늘 할 만큼 했다는 느낌을 받아요. 큰 일을 아침에 먼저 하면 그 일이 하루 종일 마음에 걸리는 걸 막아줘요.',
+  oname: '1-3-5 법칙 · 개구리 먼저 먹기',
+  origin: '1-3-5 법칙은 미국 구인 사이트 The Muse가 퍼뜨린 하루 할 일 규칙이에요. 큰 일을 아침에 먼저 하라는 건 브라이언 트레이시의 책 『개구리를 먹어라』에서 온 말로, 하기 싫은 일을 개구리에 빗댔어요.',
+  prompt: '하루 9칸 할 일 HTML을 만들어줘. \'큰 일 1칸\', \'중간 일 3칸\', \'작은 일 5칸\'이 고정으로 있고 칸마다 글을 쓰고 체크할 수 있게 해줘. 큰 일 칸은 크게 보여주고 \'아침에 먼저\'라는 표시를 붙여줘. 9칸 중 몇 개 끝냈는지 막대로 보여주고, 다 끝내면 축하 문구를 띄워줘.',
+  seed: () => ({ s: [['외주 로고 최종안 완성', 0], ['견적서 보내기', 1], ['굿즈 샘플 업체 문의', 0], ['다음 주 업로드 기획', 0], ['메일 3통 답장', 1], ['영수증 정리', 0], ['책상 정리', 1], ['폰트 백업', 0], ['물 사기', 0]] }),
+  empty: () => ({ s: Array.from({ length: 9 }, () => ['', 0]) }),
+  render(el, S, save) {
+    const T = [['큰 일', [0]], ['중간 일', [1, 2, 3]], ['작은 일', [4, 5, 6, 7, 8]]];
+    const prog = () => { const n = S.s.filter(x => x[1]).length; $('#cnt', el).textContent = `${n} / 9`; $('#bar', el).style.width = n / 9 * 100 + '%'; $('#yay', el).hidden = n < 9; };
+    el.innerHTML = `<div class="stack">
+      <div class="row between"><b>오늘 끝낸 칸</b><b class="num blue-t" id="cnt"></b></div>
+      <div class="bar"><span id="bar"></span></div>
+      <div class="box blue" id="yay" hidden><b>9칸 모두 끝냈어요. 오늘은 충분히 했어요.</b></div>
+      ${T.map(([n, idx]) => `<div class="stack" style="gap:6px"><div class="label">${n} ${idx.length}${idx.length === 1 ? ' · 아침에 먼저' : ''}</div>${idx.map(i => `<label class="slot ${i === 0 ? 'big1' : ''} ${S.s[i][1] ? 'done' : ''}" data-i="${i}"><input type="checkbox" ${S.s[i][1] ? 'checked' : ''} aria-label="완료"><input class="slot-t" value="${esc(S.s[i][0])}" placeholder="${i === 0 ? '오늘 가장 중요한 일 하나' : '비어 있어요'}" aria-label="${n} 칸"></label>`).join('')}</div>`).join('')}
+    </div>`;
+    el.oninput = e => {
+      const s = e.target.closest('.slot'); if (!s) return; const i = +s.dataset.i;
+      if (e.target.type === 'checkbox') { S.s[i][1] = e.target.checked ? 1 : 0; s.classList.toggle('done', e.target.checked); if (S.s.every(x => x[1])) chime(3, 760); prog(); }
+      else S.s[i][0] = e.target.value;
+      save();
+    };
+    prog();
+  }
+});
+
+tool({
+  slug: 'breakdown', stage: '고르기', title: '할 일 쪼개기',
+  desc: '큰 일을 10분 안에 끝낼 단계로 잘게 나눠요.',
+  tags: ['시작이 어려움', '뭐부터 할지 모름'],
+  lede: '큰 일 하나를 적고 10분 안에 끝낼 수 있는 단계로 쪼개요. 화면에는 항상 지금 할 단계 하나만 크게 보여요.',
+  why: '"포트폴리오 만들기"는 할 일이 아니라 프로젝트예요. 어디서 시작할지 모르는 일은 뇌가 부담으로 느끼고 피해요. 첫 동작이 분명한 작은 단계로 바꾸면 미룰 이유가 줄어들어요.',
+  oname: '다음 행동 (Next Action)',
+  origin: 'GTD의 원칙 중 하나예요. 모든 일을 "지금 바로 몸으로 할 수 있는 동작 하나"로 바꿔 적으라는 뜻이에요. 예를 들어 "세금 처리"가 아니라 "홈택스 로그인하기"처럼요.',
+  prompt: '할 일 쪼개기 HTML을 만들어줘. 위에 큰 목표 하나를 적고 아래에 작은 단계를 여러 개 추가할 수 있게 해줘. 체크하지 않은 첫 번째 단계를 \'지금 할 것\'으로 크게 보여주고 \'끝냈어요\' 버튼을 넣어줘. 전체 진행률 막대와 단계 순서를 바꾸는 버튼도 넣어줘.',
+  seed: () => ({ goal: '포트폴리오 사이트 만들기', steps: ['참고할 사이트 3개 북마크하기', '넣을 작업 5개 고르기', '작업 이미지 한 폴더에 모으기', '자기소개 3줄 쓰기', '무료 템플릿 하나 고르기', '첫 화면에 이름이랑 사진 넣기'].map((t, i) => ({ id: uid(), t, d: i === 0 })) }),
+  empty: () => ({ goal: '', steps: [] }),
+  render(el, S, save) {
+    const draw = () => {
+      const next = S.steps.find(s => !s.d), done = S.steps.filter(s => s.d).length;
+      el.innerHTML = `<div class="stack">
+        <input class="input goal-in" id="goal" value="${esc(S.goal)}" placeholder="큰 목표 (예: 포트폴리오 사이트 만들기)" aria-label="큰 목표">
+        <div class="row between"><span class="label">진행률</span><span class="num label">${done} / ${S.steps.length}</span></div>
+        <div class="bar"><span style="width:${S.steps.length ? done / S.steps.length * 100 : 0}%"></span></div>
+        <div class="box blue now">${next ? `<div class="label blue-t">지금 할 것</div><div class="mid" style="margin:4px 0 14px">${esc(next.t)}</div><button class="btn primary" data-fin="${next.id}">끝냈어요</button>` : `<div class="label blue-t">완료</div><div class="mid">${S.steps.length ? '모든 단계를 끝냈어요' : '아래에 첫 단계를 적어보세요'}</div>`}</div>
+        <ul class="items">${S.steps.map(s => `<li class="item ${s.d ? 'done' : ''}" data-id="${s.id}"><input type="checkbox" ${s.d ? 'checked' : ''} aria-label="완료"><span class="grow">${esc(s.t)}</span><button class="x" data-up aria-label="위로">↑</button><button class="x" data-del aria-label="삭제">×</button></li>`).join('')}</ul>
+        <form class="addrow" id="f"><input class="input" placeholder="다음 단계 (10분 안에 끝낼 만큼 작게)" aria-label="단계"><button class="btn">추가</button></form>
+      </div>`;
+    };
+    el.oninput = e => { if (e.target.id === 'goal') { S.goal = e.target.value; save(); } };
+    el.onsubmit = e => { e.preventDefault(); const v = $('#f input', el).value.trim(); if (!v) return; S.steps.push({ id: uid(), t: v, d: false }); save(); draw(); $('#f input', el).focus(); };
+    el.onclick = e => {
+      const f = e.target.closest('[data-fin]'); if (f) { S.steps.find(s => s.id === f.dataset.fin).d = true; chime(1, 700); save(); draw(); return; }
+      const li = e.target.closest('li[data-id]'); if (!li) return; const i = S.steps.findIndex(s => s.id === li.dataset.id);
+      if (e.target.matches('input')) S.steps[i].d = e.target.checked;
+      else if (e.target.closest('[data-del]')) S.steps.splice(i, 1);
+      else if (e.target.closest('[data-up]') && i > 0) [S.steps[i - 1], S.steps[i]] = [S.steps[i], S.steps[i - 1]];
+      else return;
+      save(); draw();
+    };
+    draw();
+  }
+});
+
+/* ========== 배치하기 ========== */
+tool({
+  slug: 'dayplan', stage: '배치하기', title: '하루 시간표 칠하기',
+  desc: '하루를 30분 칸으로 나눠 할 일을 미리 칠해둬요.',
+  tags: ['뭐부터 할지 모름', '시간 감각이 없음'],
+  lede: '하루를 30분 칸으로 나누고 할 일 종류를 골라 칠해요. 시간 옆 숫자를 누르면 컨디션 좋은 시간으로 표시돼요. 계획에 없던 일이 끼어들면 그 칸에 따로 적어둘 수 있어요.',
+  why: '할 일 목록은 무엇을 할지만 정하고 언제 할지는 비워둬요. 칸에 칠해보면 하루에 실제로 쓸 수 있는 시간이 생각보다 적다는 게 보여서 계획이 현실적으로 바뀌어요. 컨디션 좋은 시간에 어려운 일을 놓으면 같은 일도 빨리 끝나요.',
+  oname: '타임 블로킹 (Time blocking)',
+  origin: '칼 뉴포트가 『딥 워크』에서 소개해 널리 알려진 방식이에요. 하루를 블록 단위로 나눠 미리 채우고, 계획이 틀어지면 남은 시간을 다시 칠해요.',
+  prompt: '아침 8시부터 밤 11시까지 30분 단위 칸이 있는 하루 시간표 HTML을 만들어줘. \'집중 작업, 연락·회의, 생활, 쉼\' 중 하나를 고르고 칸을 마우스로 끌어서 칠할 수 있게 해줘. 시간 숫자를 누르면 \'컨디션 좋은 시간\'으로 표시되게 하고, \'끼어든 일\'을 고르면 칸에 메모를 적을 수 있게 해줘. 옆에 종류별 합계 시간을 보여줘.',
+  seed: () => {
+    const p = {}; const f = (a, b, c) => { for (let i = a; i < b; i++) p[i] = { c }; };
+    f(0, 1, 3); f(2, 8, 1); f(8, 10, 4); f(10, 12, 2); p[12] = { c: 5, n: '클라이언트 급한 통화' }; f(13, 18, 1); f(18, 20, 2); f(20, 22, 3); f(22, 26, 4);
+    return { p, e: { 9: 1, 10: 1, 11: 1, 15: 1 } };
+  },
+  empty: () => ({ p: {}, e: {} }),
+  render(el, S, save) {
+    const C = [[1, '집중 작업'], [2, '연락·회의'], [3, '생활'], [4, '쉼'], [5, '끼어든 일'], [0, '지우개']];
+    const name = c => (C.find(x => x[0] === c) || [])[1];
+    let brush = 1, painting = false;
+    el.innerHTML = `<div class="stack">
+      <div class="pills" id="br">${C.map(([c, n]) => `<button data-c="${c}" aria-pressed="${c === 1}">${c ? `<i class="dot" style="background:var(--dp${c})"></i>` : ''}${n}</button>`).join('')}</div>
+      <input class="input" id="note" placeholder="끼어든 일 내용 (예: 급한 미팅)" aria-label="끼어든 일 메모" hidden>
+      <p class="hint" id="hint">색을 고르고 칸을 누르거나 끌어서 칠해요. 시간 숫자를 누르면 컨디션 좋은 시간이 돼요.</p>
+      <div class="dp" id="dp"></div>
+      <div class="box gray stack" style="gap:8px" id="sum"></div>
+    </div>`;
+    const dp = $('#dp', el);
+    let h = '';
+    for (let hr = 8; hr < 23; hr++) { const i = (hr - 8) * 2; h += `<button class="dp-h" data-h="${hr}" aria-label="${hr}시 컨디션 좋은 시간 표시">${hr}시</button><div class="dp-s" data-i="${i}"></div><div class="dp-s" data-i="${i + 1}"></div>`; }
+    dp.innerHTML = h;
+    const paintCell = (cell) => {
+      const i = +cell.dataset.i, v = S.p[i], prev = S.p[i - 1];
+      cell.dataset.c = v ? v.c : '';
+      cell.textContent = v ? (v.c === 5 ? v.n : (!prev || prev.c !== v.c || i % 2 === 0 && false) ? name(v.c) : '') : '';
+    };
+    const drawCells = () => {
+      $$('.dp-s', dp).forEach(paintCell);
+      $$('.dp-h', dp).forEach(b => b.setAttribute('aria-pressed', !!S.e[b.dataset.h]));
+      const n = new Date(), idx = (n.getHours() - 8) * 2 + (n.getMinutes() >= 30 ? 1 : 0);
+      $$('.dp-s', dp).forEach(s => s.classList.toggle('now', +s.dataset.i === idx));
+      summary();
+    };
+    const summary = () => {
+      const cnt = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }; Object.values(S.p).forEach(v => cnt[v.c]++);
+      const free = 30 - Object.keys(S.p).length;
+      const good = Object.entries(S.p).filter(([i, v]) => v.c === 1 && S.e[8 + Math.floor(i / 2)]).length / 2;
+      const eh = Object.keys(S.e).length;
+      $('#sum', el).innerHTML = C.slice(0, 5).map(([c, n]) => `<div class="row between"><span class="row" style="gap:8px"><i class="dot" style="background:var(--dp${c})"></i>${n}</span><span class="num">${c === 5 ? cnt[5] + '번' : cnt[c] / 2 + '시간'}</span></div>`).join('') +
+        `<div class="row between muted"><span>비어 있음</span><span class="num">${free / 2}시간</span></div>` +
+        (eh ? `<p class="hint" style="margin-top:4px;color:var(--t3)">컨디션 좋은 시간 ${eh}시간 중 집중 작업이 <b class="blue-t">${good}시간</b> 들어가 있어요.</p>` : '');
+    };
+    const paint = cell => {
+      if (!cell || !cell.classList.contains('dp-s')) return;
+      const i = +cell.dataset.i;
+      if (brush === 0) delete S.p[i]; else if (brush === 5) S.p[i] = { c: 5, n: $('#note', el).value.trim() || '끼어든 일' }; else S.p[i] = { c: brush };
+      $$('.dp-s', dp).filter(s => Math.abs(+s.dataset.i - i) <= 1).forEach(paintCell);
+    };
+    $('#br', el).onclick = e => { const b = e.target.closest('button'); if (!b) return; brush = +b.dataset.c; $$('#br button', el).forEach(x => x.setAttribute('aria-pressed', x === b)); $('#note', el).hidden = brush !== 5; if (brush === 5) $('#note', el).focus(); };
+    dp.addEventListener('click', e => { const b = e.target.closest('.dp-h'); if (!b) return; const k = b.dataset.h; if (S.e[k]) delete S.e[k]; else S.e[k] = 1; save(); drawCells(); });
+    dp.addEventListener('pointerdown', e => { if (!e.target.classList.contains('dp-s')) return; e.preventDefault(); painting = brush !== 5; paint(e.target); if (!painting) { save(); summary(); } });
+    dp.addEventListener('pointermove', e => { if (painting) paint(document.elementFromPoint(e.clientX, e.clientY)); });
+    const up = () => { if (painting) { painting = false; save(); summary(); } };
+    addEventListener('pointerup', up);
+    every(() => { if (!document.body.contains(dp)) removeEventListener('pointerup', up); }, 5000);
+    drawCells();
+  }
+});
+
+tool({
+  slug: 'weekly', stage: '배치하기', title: '주간 고정 시간표',
+  desc: '학교 시간표처럼 요일마다 반복할 일을 정해둬요.',
+  tags: ['꾸준히 못 함', '뭐부터 할지 모름'],
+  lede: '월요일부터 일요일까지 오전, 오후, 저녁에 어떤 종류의 일을 할지 한 번 정해두는 시간표예요. 매주 같은 리듬으로 돌아가서 매일 아침 뭘 할지 새로 고민하지 않아도 돼요.',
+  why: '학교가 편했던 이유 중 하나는 언제 무엇을 할지 정해져 있었다는 거예요. 혼자 일하면 이 틀이 없어서 매일 새로 정하느라 힘을 써요. 비슷한 일을 같은 시간에 몰아두면 일 종류를 바꿀 때마다 드는 준비 시간도 줄어요.',
+  oname: '테마 데이 · 고정 시간표',
+  origin: '잭 도시가 트위터와 스퀘어를 동시에 운영할 때 요일마다 한 가지 주제만 다룬 방식으로 알려졌어요. 여기에 학교 시간표처럼 매주 반복하는 틀을 합쳤어요.',
+  prompt: '주간 고정 시간표 HTML을 만들어줘. 가로는 월~일, 세로는 오전·오후·저녁 3칸으로 하고 위에서 일 종류를 고른 다음 칸을 누르면 그 색으로 채워지게 해줘. 일 종류 이름은 내가 바꿀 수 있게 하고 종류별로 몇 칸인지 합계를 보여줘. 맨 위에는 오늘 요일의 오전·오후·저녁 할 일을 크게 보여줘.',
+  seed: () => {
+    const g = {}; const put = (d, p, s) => g[d + '-' + p] = s;
+    for (let d = 0; d < 5; d++) { put(d, 0, d === 0 ? 3 : 0); put(d, 1, d % 2 ? 1 : 0); put(d, 2, 4); }
+    put(1, 2, 2); put(3, 2, 2); put(4, 1, 1); put(5, 0, 1); put(5, 1, 4); put(5, 2, 4); put(6, 0, 4); put(6, 1, 4); put(6, 2, 3);
+    return { subs: ['외주', '내 작업', '공부', '행정', '쉼'], g };
+  },
+  empty: () => ({ subs: ['외주', '내 작업', '공부', '행정', '쉼'], g: {} }),
+  render(el, S, save) {
+    const P = ['오전', '오후', '저녁'], DN = ['월', '화', '수', '목', '금', '토', '일'], td = (new Date().getDay() + 6) % 7;
+    let cur = 0;
+    const draw = () => {
+      const cnt = S.subs.map((_, i) => Object.values(S.g).filter(v => v === i).length);
+      el.innerHTML = `<div class="stack">
+        <div class="box blue"><div class="label blue-t">오늘은 ${DN[td]}요일</div><div class="wk-today">${P.map((p, i) => { const v = S.g[td + '-' + i]; return `<div><span class="label">${p}</span><b>${v != null ? esc(S.subs[v]) : '비어 있음'}</b></div>`; }).join('')}</div></div>
+        <div class="pills" id="subs">${S.subs.map((s, i) => `<button data-i="${i}" aria-pressed="${i === cur}"><i class="dot" style="background:var(--wk${i})"></i>${esc(s)} <span class="num muted">${cnt[i]}</span></button>`).join('')}</div>
+        <div class="addrow"><input class="input" id="rn" value="${esc(S.subs[cur])}" aria-label="고른 일 종류 이름"><button class="btn" id="rnb">이름 바꾸기</button></div>
+        <div class="wk">${'<span></span>' + DN.map((d, i) => `<span class="wk-d ${i === td ? 'on' : ''}">${d}</span>`).join('')}${P.map((p, pi) => `<span class="wk-p">${p}</span>` + DN.map((_, d) => { const v = S.g[d + '-' + pi]; return `<button class="wk-c" data-k="${d}-${pi}" ${v != null ? `data-s="${v}"` : ''} aria-label="${DN[d]} ${p}">${v != null ? esc(S.subs[v]) : ''}</button>`; }).join('')).join('')}</div>
+        <p class="hint">일 종류를 고르고 칸을 누르면 채워져요. 같은 종류 칸을 다시 누르면 비워져요.</p>
+      </div>`;
+    };
+    el.onclick = e => {
+      const s = e.target.closest('#subs button'); if (s) { cur = +s.dataset.i; draw(); return; }
+      const c = e.target.closest('.wk-c'); if (c) { const k = c.dataset.k; if (S.g[k] === cur) delete S.g[k]; else S.g[k] = cur; save(); draw(); return; }
+      if (e.target.id === 'rnb') { const v = $('#rn', el).value.trim(); if (!v) return; S.subs[cur] = v; save(); draw(); }
+    };
+    draw();
+  }
+});
+
+tool({
+  slug: 'backward', stage: '배치하기', title: '마감 역산',
+  desc: '마감일에서 거꾸로 세어 단계마다 시작할 날을 알려줘요.',
+  tags: ['시간 감각이 없음', '뭐부터 할지 모름'],
+  lede: '마감일과 단계별로 걸리는 날짜를 넣으면 거꾸로 계산해서 단계마다 언제 시작해야 하는지 알려줘요. 오늘 해야 하는 단계는 파란 테두리로 표시돼요.',
+  why: '마감까지 30일이 남았다고 하면 여유롭게 느껴져요. 그런데 단계를 쪼개서 거꾸로 세어보면 사실 오늘 시작해야 하는 경우가 많아요. 막연한 "언젠가"가 날짜가 박힌 "오늘"로 바뀌는 계산이에요.',
+  oname: '역산 계획 (Backward planning)',
+  origin: '끝나는 시점에서 거꾸로 일정을 짜는 계획법이에요. 행사 기획이나 건설처럼 날짜를 미룰 수 없는 일에서 오래 써온 방식이에요.',
+  prompt: '마감 역산 계획 HTML을 만들어줘. 마감일을 고르고 단계 이름과 걸리는 일수를 여러 개 넣으면, 마감일부터 거꾸로 계산해서 단계마다 시작일과 끝나는 날을 보여줘. 맨 위에 \'D-16\'처럼 남은 날을 크게 보여주고, 첫 단계 시작일이 오늘이거나 이미 지났으면 경고를 띄워줘.',
+  seed: () => ({ due: dkey(addDays(new Date(), 16)), steps: [['아이디어 정리', 3], ['초안 작업', 6], ['피드백 받고 수정', 3], ['최종 점검', 1], ['예비일', 2]] }),
+  empty: () => ({ due: dkey(addDays(new Date(), 14)), steps: [] }),
+  render(el, S, save) {
+    const t0 = today0(), fmt = d => `${d.getMonth() + 1}/${d.getDate()} (${WD[d.getDay()]})`;
+    const draw = (focusI) => {
+      let end = parseD(S.due); const rows = [];
+      for (let i = S.steps.length - 1; i >= 0; i--) { const [n, d] = S.steps[i]; const s = addDays(end, -d + 1); rows.unshift({ n, d, s, e: end, i }); end = addDays(s, -1); }
+      const left = Math.round((parseD(S.due) - t0) / 864e5), first = rows[0], gap = first ? Math.round((first.s - t0) / 864e5) : null;
+      el.innerHTML = `<div class="stack">
+        <div class="box gray row between"><div><div class="label">마감일</div><input class="input flat" type="date" id="due" value="${S.due}" aria-label="마감일" style="width:auto"></div><div class="big ${left <= 7 ? 'red-t' : ''}">${left > 0 ? 'D-' + left : left === 0 ? 'D-DAY' : 'D+' + (-left)}</div></div>
+        ${first ? `<div class="box ${gap <= 0 ? 'red-box' : 'blue'}"><b class="${gap <= 0 ? 'red-t' : 'blue-t'}">${gap < 0 ? `계획대로라면 ${-gap}일 전에 시작했어야 해요. 단계를 줄이거나 마감을 조정해요.` : gap === 0 ? '오늘 첫 단계를 시작해야 해요.' : `첫 단계는 ${gap}일 뒤 ${fmt(first.s)}에 시작하면 돼요.`}</b></div>` : ''}
+        <ul class="items">${rows.map(r => `<li class="item bw ${r.s <= t0 && r.e >= t0 ? 'on' : r.e < t0 ? 'done' : ''}"><span class="grow"><b>${esc(r.n)}</b><br><span class="sub num">${fmt(r.s)} 시작 ~ ${fmt(r.e)}</span></span><input class="input days" type="number" min="1" value="${r.d}" data-i="${r.i}" aria-label="${esc(r.n)} 일수"><span class="sub">일</span><button class="x" data-del="${r.i}" aria-label="삭제">×</button></li>`).join('')}</ul>
+        <form class="bw-f" id="f"><input class="input" placeholder="단계 이름" aria-label="단계 이름"><input class="input" type="number" min="1" value="2" aria-label="일수"><button class="btn">추가</button></form>
+      </div>`;
+      if (focusI != null) { const f = $(`[data-i="${focusI}"]`, el); if (f) { f.focus(); f.select(); } }
+    };
+    el.onchange = e => {
+      if (e.target.id === 'due' && e.target.value) { S.due = e.target.value; save(); draw(); }
+      if (e.target.dataset.i != null) { S.steps[+e.target.dataset.i][1] = Math.max(1, +e.target.value || 1); save(); draw(+e.target.dataset.i); }
+    };
+    el.onclick = e => { const d = e.target.closest('[data-del]'); if (!d) return; S.steps.splice(+d.dataset.del, 1); save(); draw(); };
+    el.onsubmit = e => { e.preventDefault(); const [a, b] = $$('#f input', el); const v = a.value.trim(); if (!v) return; S.steps.push([v, Math.max(1, +b.value || 1)]); save(); draw(); };
+    draw();
+  }
+});
+
+tool({
+  slug: 'week168', stage: '배치하기', title: '일주일 시간 나눠보기',
+  desc: '일주일 168시간을 가계부처럼 나눠보고 남는 시간을 확인해요.',
+  tags: ['시간 감각이 없음', '쉬지를 못함'],
+  lede: '누구에게나 일주일은 168시간(24시간 × 7일)이에요. 잠, 일, 이동 같은 항목에 하루 몇 시간씩 쓰는지 넣으면 일주일에 남는 시간이 얼마인지 바로 보여요.',
+  why: '"시간이 없다"고 느껴도 직접 계산해 보면 생각보다 여유가 있거나, 반대로 계획 자체가 불가능한 경우가 많아요. 숫자로 나눠보면 새 습관을 넣을 자리가 진짜 있는지 판단할 수 있어요.',
+  oname: '168시간',
+  origin: '시간관리 작가 로라 밴더캠의 책 『168시간』에서 온 말이에요. 하루 단위로 보면 빠듯해도 일주일 단위로 보면 쓸 수 있는 시간이 보인다고 말해요.',
+  prompt: '일주일 168시간 나눠보기 HTML을 만들어줘. 수면, 일, 이동, 식사·집안일, 운동, 사람 만나기, 쉼 항목마다 하루 몇 시간인지 슬라이더로 정하면 일주일 합계(×7)를 보여줘. 맨 위에 168시간 중 남은 시간을 크게 보여주고, 넘치면 빨간색으로 경고해줘.',
+  seed: () => ({ v: [7, 8, 1, 2.5, .5, 1, 2] }),
+  empty: () => ({ v: [0, 0, 0, 0, 0, 0, 0] }),
+  render(el, S, save) {
+    const C = ['수면', '일', '이동', '식사·집안일', '운동', '사람 만나기', '쉼'];
+    el.innerHTML = `<div class="stack">
+      <div class="box gray"><div class="label">일주일 168시간 중 남은 시간</div><div class="big" id="left" style="margin:6px 0 12px"></div><div class="bar" id="bw"><span id="bar"></span></div><p class="hint" id="msg" style="margin-top:8px"></p></div>
+      <div class="stack" style="gap:16px">${C.map((c, i) => `<div class="w168"><div class="row between"><b>${c}</b><span class="num sub" id="v${i}"></span></div><input type="range" min="0" max="14" step=".5" data-i="${i}" value="${S.v[i]}" aria-label="${c} 하루 시간"></div>`).join('')}</div>
+    </div>`;
+    const draw = () => {
+      const used = S.v.reduce((a, b) => a + b, 0) * 7, left = 168 - used;
+      $('#left', el).textContent = (left < 0 ? '-' : '') + Math.abs(left).toFixed(1).replace('.0', '') + '시간';
+      $('#left', el).className = 'big ' + (left < 0 ? 'red-t' : '');
+      $('#bw', el).className = 'bar ' + (left < 0 ? 'red' : '');
+      $('#bar', el).style.width = Math.min(100, used / 168 * 100) + '%';
+      $('#msg', el).textContent = left < 0 ? '일주일보다 많이 계획했어요. 어딘가 줄여야 해요.' : `하루 평균 ${(left / 7).toFixed(1)}시간이 아무것도 정해지지 않은 시간이에요.`;
+      S.v.forEach((v, i) => $('#v' + i, el).textContent = `하루 ${v}시간 · 주 ${+(v * 7).toFixed(1)}시간`);
+    };
+    el.oninput = e => { if (e.target.dataset.i == null) return; S.v[+e.target.dataset.i] = +e.target.value; save(); draw(); };
+    draw();
+  }
+});
+
+/* ========== 실행하기 ========== */
+tool({
+  slug: 'timer', stage: '실행하기', title: '집중 타이머',
+  desc: '2분만, 25분 집중, 끝날 때까지 중에 골라 집중해요.',
+  tags: ['시작이 어려움', '집중이 안 됨'],
+  lede: '세 가지 방식 중에 골라 쓰는 타이머예요. 시작이 어려운 날은 "2분만", 보통은 "25분 집중", 몰입이 잘되는 날은 "끝날 때까지". 집중이 끝나면 쉬는 시간도 알아서 정해줘요.',
+  why: '"딱 2분만" 같은 작은 약속은 거절하기 어려워서 몸이 먼저 움직여요. 25분처럼 짧게 끊으면 쉬는 시간이 정해져 있어서 쉬는 데 죄책감이 덜해요. 몰입이 잘될 때는 타이머가 끊지 않게 두고, 일한 만큼 쉬는 게 지치지 않는 방법이에요.',
+  oname: '뽀모도로 · 플로우타임 · 2분 규칙',
+  origin: '뽀모도로는 1980년대 프란체스코 시릴로가 토마토(이탈리아어로 pomodoro) 모양 주방 타이머로 공부하며 만든 방법이에요. 플로우타임은 시간을 정하지 않고 몰입이 끊길 때까지 일하는 변형이고, 2분 규칙은 습관 연구자 제임스 클리어가 『아주 작은 습관의 힘』에서 소개했어요.',
+  prompt: '집중 타이머 HTML을 만들어줘. 모드는 \'2분만\', \'25분 집중\', \'끝날 때까지\' 세 가지야. 25분이 끝나면 5분 휴식으로 넘어가고 네 번째마다 15분 휴식으로 해줘. \'끝날 때까지\'는 시간이 올라가다가 멈추면 일한 시간의 5분의 1만큼 휴식을 시작해줘. 2분이 끝나면 \'여기서 멈춰도 괜찮아요\'와 \'10분 더\' 버튼을 보여줘. 남은 시간은 동그란 링으로 보여주고 오늘 집중한 시간을 기록해줘.',
+  seed: () => ({ days: { [ago(1)]: { n: 4, m: 105 }, [ago(2)]: { n: 3, m: 80 }, [dkey()]: { n: 2, m: 50 } }, pomo: 2 }),
+  empty: () => ({ days: {}, pomo: 0 }),
+  render(el, S, save) {
+    const MODES = { two: '2분만', pomo: '25분 집중', flow: '끝날 때까지' };
+    let mode = 'pomo', phase = 'idle', clk = null, total = 1500;
+    const C = 2 * Math.PI * 88;
+    el.innerHTML = `<div class="stack">
+      <div class="seg" id="modes">${Object.entries(MODES).map(([k, v]) => `<button data-m="${k}" aria-pressed="${k === mode}">${v}</button>`).join('')}</div>
+      <div class="box gray tm">
+        <div class="ring"><svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="88" fill="none" stroke="#E5E8EB" stroke-width="10"/><circle id="arc" cx="100" cy="100" r="88" fill="none" stroke="var(--blue)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}"/></svg><div class="ring-t"><b class="num" id="clk"></b><span id="lbl"></span></div></div>
+        <div class="row" style="justify-content:center"><button class="btn primary lg" id="go"></button><button class="btn lg" id="rs">처음으로</button></div>
+        <div class="box tm-after" id="after" hidden><b id="aftT"></b><div class="row" style="margin-top:12px;justify-content:center"><button class="btn primary" id="more">10분 더 해볼래요</button><button class="btn" id="enough">여기서 멈출래요</button></div></div>
+        <label class="fast"><input type="checkbox" id="fast"> 체험용 빨리 감기 (1초가 1분)</label>
+        <label class="fast"><input type="checkbox" id="snd"> 배경 소리 켜기 (빗소리 같은 잔잔한 소음)</label>
+      </div>
+      <div class="stats" id="st"></div>
+    </div>`;
+    const sp = () => $('#fast', el).checked ? 60 : 1;
+    const day = () => (S.days[dkey()] = S.days[dkey()] || { n: 0, m: 0 });
+    const stats = () => {
+      const d = S.days[dkey()] || { n: 0, m: 0 }, wk = Object.entries(S.days).filter(([k]) => parseD(k) >= mondayOf()).reduce((a, [, v]) => a + v.m, 0);
+      $('#st', el).innerHTML = `<div class="stat"><b>${hm(d.m)}</b><span>오늘 집중</span></div><div class="stat"><b>${d.n}번</b><span>오늘 세션</span></div><div class="stat"><b>${hm(wk)}</b><span>이번 주</span></div>`;
+    };
+    const show = v => {
+      const up = mode === 'flow' && phase === 'focus';
+      $('#clk', el).textContent = mmss(v);
+      $('#arc', el).style.strokeDashoffset = up ? C * (1 - (v % 3600) / 3600) : C * (1 - v / total);
+    };
+    const ui = () => {
+      const run = clk && clk.running;
+      $('#lbl', el).textContent = phase === 'break' ? '쉬는 시간' : phase === 'focus' ? (mode === 'two' ? '딱 2분만' : '집중하는 중') : '준비됐으면 눌러요';
+      $('#go', el).textContent = mode === 'flow' && phase === 'focus' ? (run ? '멈추고 쉬기' : '이어서') : run ? '잠깐 멈춤' : phase === 'idle' ? '시작' : '이어서';
+      $('#arc', el).style.stroke = phase === 'break' ? 'var(--blue-2)' : 'var(--blue)';
+    };
+    const add = m => { const d = day(); d.n++; d.m += Math.round(m); save(); stats(); };
+    const countdown = (sec, done) => { if (clk) clk.stop(); total = sec; clk = Clock({ from: sec, speed: sp, tick: show, done }); show(sec); };
+    const idle = () => {
+      if (clk) clk.stop(); phase = 'idle'; $('#after', el).hidden = true;
+      if (mode === 'flow') { total = 1; clk = null; $('#clk', el).textContent = '00:00'; $('#arc', el).style.strokeDashoffset = C; }
+      else countdown(mode === 'two' ? 120 : 1500);
+      ui();
+    };
+    const brk = min => { phase = 'break'; countdown(min * 60, () => { chime(2, 520); idle(); }); clk.start(); ui(); };
+    const start = () => {
+      $('#after', el).hidden = true;
+      if (phase === 'idle') {
+        phase = 'focus';
+        if (mode === 'flow') clk = Clock({ speed: sp, tick: show });
+        else if (mode === 'two') countdown(120, () => { chime(); add(2); phase = 'idle'; $('#aftT', el).textContent = '2분 지났어요. 시작한 것만으로 충분해요. 여기서 멈춰도 괜찮아요.'; $('#more', el).hidden = false; $('#after', el).hidden = false; ui(); });
+        else countdown(1500, () => { chime(3); add(25); S.pomo = (S.pomo || 0) + 1; save(); brk(S.pomo % 4 === 0 ? 15 : 5); });
+      }
+      clk.start(); ui();
+    };
+    $('#go', el).onclick = () => {
+      if (mode === 'flow' && phase === 'focus' && clk && clk.running) { clk.stop(); const m = Math.max(1, clk.v / 60); add(m); chime(1); brk(Math.min(20, Math.max(3, Math.round(m / 5)))); return; }
+      if (clk && clk.running) { clk.stop(); ui(); return; }
+      start();
+    };
+    $('#rs', el).onclick = idle;
+    $('#more', el).onclick = () => { $('#after', el).hidden = true; phase = 'focus'; countdown(600, () => { chime(); add(10); phase = 'idle'; $('#aftT', el).textContent = '10분 해냈어요. 오늘 시작은 확실히 됐어요.'; $('#more', el).hidden = true; $('#after', el).hidden = false; ui(); }); clk.start(); ui(); };
+    $('#enough', el).onclick = () => { $('#after', el).hidden = true; idle(); };
+    $('#modes', el).onclick = e => { const b = e.target.closest('button'); if (!b) return; mode = b.dataset.m; $$('#modes button', el).forEach(x => x.setAttribute('aria-pressed', x === b)); idle(); };
+    let src = null;
+    window._stopSound = () => { try { src && src.stop(); } catch (e) {} src = null; };
+    $('#snd', el).onchange = e => {
+      window._stopSound(); if (!e.target.checked) return;
+      unlockAudio(); const n = _ac.sampleRate * 4, b = _ac.createBuffer(1, n, _ac.sampleRate), d = b.getChannelData(0); let last = 0;
+      for (let i = 0; i < n; i++) { last = (last + .02 * (Math.random() * 2 - 1)) / 1.02; d[i] = last * 3.5; }
+      const g = _ac.createGain(); g.gain.value = .35; src = _ac.createBufferSource(); src.buffer = b; src.loop = true; src.connect(g).connect(_ac.destination); src.start();
+    };
+    stats(); idle();
+  }
+});
+
+tool({
+  slug: 'openclose', stage: '실행하기', title: '하루 열고 닫기',
+  desc: '일 시작 전 의식과 퇴근 전 마무리를 체크리스트로 해요.',
+  tags: ['시작이 어려움', '쉬지를 못함'],
+  lede: '집에서 일하면 출근길도 퇴근길도 없어요. 일을 시작할 때 정해진 순서를 밟고, 끝낼 때는 마무리 체크리스트와 짧은 회고를 마치고 퇴근 버튼을 눌러요. 어제 적은 "내일 첫 할 일"은 다음 날 열기 화면에 다시 나타나요.',
+  why: '같은 행동을 같은 순서로 반복하면 뇌가 그 순서를 "이제 일할 시간"이라는 신호로 배워요. 끝낼 때도 마찬가지예요. 내일 첫 할 일까지 적어두면 미완료 걱정을 내려놓을 수 있어서 저녁 시간이 온전히 내 것이 돼요.',
+  oname: '시작 의식 · 셧다운 의식 (Shutdown ritual)',
+  origin: '칼 뉴포트가 『딥 워크』에서 소개한 셧다운 의식은 하루 일을 마칠 때 정해진 절차를 거치고 "끝"을 선언하는 습관이에요. 운동선수가 경기 전에 하는 루틴처럼 시작에도 같은 원리를 쓸 수 있어요.',
+  prompt: '하루 열고 닫기 HTML을 만들어줘. \'하루 열기\'와 \'하루 닫기\' 탭이 있어. 열기에는 내가 정한 시작 의식 체크리스트가 있고 다 체크하면 \'시작!\'이 크게 떠. 닫기에는 마무리 체크리스트와 \'오늘 잘한 일\', \'아쉬웠던 일\', \'내일 첫 할 일\' 칸이 있고 다 채워야 퇴근 버튼이 눌려. 퇴근하면 \'오늘 일 끝\' 화면으로 바뀌고, 내일 첫 할 일은 다음 날 열기 화면 맨 위에 보여줘.',
+  seed: () => ({ day: dkey(), open: ['물 한 컵 떠오기', '휴대폰은 다른 방에', '오늘 할 일 3개 적기', '작업 파일 하나만 열기'].map(t => ({ t, d: false })), close: ['작업 파일 저장·백업', '열린 탭과 창 닫기', '메신저 알림 끄기', '책상 위 컵 치우기'].map(t => ({ t, d: false })), ans: { a: '', b: '', c: '' }, first: '외주 수정본 확인부터', off: null, opened: { [ago(1)]: 1, [ago(2)]: 1, [ago(4)]: 1 } }),
+  empty: () => ({ day: dkey(), open: [], close: [], ans: { a: '', b: '', c: '' }, first: '', off: null, opened: {} }),
+  render(el, S, save) {
+    const tk = dkey();
+    if (S.day !== tk) { S.day = tk; S.open.forEach(x => x.d = false); S.close.forEach(x => x.d = false); if (S.ans.c) S.first = S.ans.c; S.ans = { a: '', b: '', c: '' }; save(); }
+    let tab = new Date().getHours() < 15 ? 'open' : 'close', confirm = false;
+    const list = k => `<ul class="items">${S[k].map((x, i) => `<li class="item ${x.d ? 'done' : ''}"><input type="checkbox" data-k="${k}" data-i="${i}" ${x.d ? 'checked' : ''} aria-label="${esc(x.t)}"><span class="grow">${esc(x.t)}</span><button class="x" data-del="${k}-${i}" aria-label="삭제">×</button></li>`).join('')}</ul><form class="addrow" data-add="${k}"><input class="input" placeholder="항목 추가" aria-label="항목 추가"><button class="btn">추가</button></form>`;
+    const draw = () => {
+      const offToday = S.off && S.off.slice(0, 10) === tk, allO = S.open.length && S.open.every(x => x.d), allC = S.close.every(x => x.d) && S.ans.c.trim();
+      let body;
+      if (tab === 'open') body = `${S.first ? `<div class="box blue"><div class="label blue-t">어제의 내가 남긴 오늘 첫 할 일</div><div class="mid" style="margin-top:4px">${esc(S.first)}</div></div>` : ''}
+        ${allO ? `<div class="box gray" style="text-align:center;padding:28px"><div class="big blue-t">시작!</div><p class="sub" style="margin:8px 0 0">이제 첫 할 일을 열어요.</p></div>` : ''}
+        <div class="row between"><b>시작 의식</b><span class="num label">${S.open.filter(x => x.d).length} / ${S.open.length}</span></div>${list('open')}
+        <p class="hint">의식을 끝낸 날 ${Object.keys(S.opened).length}일</p>`;
+      else if (offToday) body = `<div class="box gray off"><div class="big">오늘 일 끝</div><p class="sub num" style="margin:6px 0 18px">${S.off.slice(11)} 퇴근</p>
+        ${S.ans.a ? `<div class="label">오늘 잘한 일</div><p style="margin:2px 0 12px">${esc(S.ans.a)}</p>` : ''}<div class="label">내일 첫 할 일</div><p style="margin:2px 0 18px"><b>${esc(S.ans.c)}</b></p>
+        ${confirm ? `<p class="sub">정말요? 오늘 충분히 했어요.</p><div class="row"><button class="btn" id="no">쉴게요</button><button class="btn danger" id="yes">그래도 일할래요</button></div>` : '<button class="btn" id="back2">다시 일하기</button>'}</div>`;
+      else body = `<div class="row between"><b>마무리 체크</b><span class="num label">${S.close.filter(x => x.d).length} / ${S.close.length}</span></div>${list('close')}
+        <div class="stack" style="gap:8px;margin-top:6px"><label class="label" for="qa">오늘 잘한 일</label><input class="input" id="qa" data-a="a" value="${esc(S.ans.a)}" placeholder="아주 작아도 괜찮아요">
+        <label class="label" for="qb">아쉬웠던 일</label><input class="input" id="qb" data-a="b" value="${esc(S.ans.b)}" placeholder="다음엔 어떻게 해볼지까지 적으면 더 좋아요">
+        <label class="label" for="qc">내일 첫 할 일</label><input class="input" id="qc" data-a="c" value="${esc(S.ans.c)}" placeholder="내일 아침 바로 시작할 일 하나"></div>
+        <button class="btn primary lg block" id="off" ${allC ? '' : 'disabled'}>${allC ? '퇴근하기' : '체크리스트와 내일 첫 할 일을 채우면 퇴근할 수 있어요'}</button>`;
+      el.innerHTML = `<div class="stack"><div class="seg" id="tabs"><button data-t="open" aria-pressed="${tab === 'open'}">하루 열기</button><button data-t="close" aria-pressed="${tab === 'close'}">하루 닫기</button></div>${body}</div>`;
+    };
+    el.onchange = e => {
+      const c = e.target.closest('[data-k]'); if (!c) return; S[c.dataset.k][+c.dataset.i].d = c.checked;
+      if (c.dataset.k === 'open' && S.open.every(x => x.d) && !S.opened[tk]) { S.opened[tk] = 1; chime(2, 700); }
+      save(); draw();
+    };
+    el.oninput = e => {
+      const a = e.target.dataset.a; if (!a) return; S.ans[a] = e.target.value; save();
+      const b = $('#off', el), ok = S.close.every(x => x.d) && S.ans.c.trim(); b.disabled = !ok; b.textContent = ok ? '퇴근하기' : '체크리스트와 내일 첫 할 일을 채우면 퇴근할 수 있어요';
+    };
+    el.onsubmit = e => { e.preventDefault(); const k = e.target.dataset.add, v = $('input', e.target).value.trim(); if (!v) return; S[k].push({ t: v, d: false }); save(); draw(); };
+    el.onclick = e => {
+      const t = e.target.closest('#tabs button'); if (t) { tab = t.dataset.t; draw(); return; }
+      const d = e.target.closest('[data-del]'); if (d) { const [k, i] = d.dataset.del.split('-'); S[k].splice(+i, 1); save(); draw(); return; }
+      const id = e.target.id;
+      if (id === 'off') { S.off = tk + ' ' + hhmm(new Date()); chime(2, 520); save(); draw(); }
+      if (id === 'back2') { confirm = true; draw(); }
+      if (id === 'no') { confirm = false; draw(); }
+      if (id === 'yes') { confirm = false; S.off = null; save(); draw(); }
+    };
+    draw();
+  }
+});
+
+tool({
+  slug: 'cowork', stage: '실행하기', title: '함께 집중하는 방',
+  desc: '다른 사람들이 옆에서 일하는 것 같은 느낌을 만들어줘요.',
+  tags: ['집중이 안 됨', '시작이 어려움'],
+  lede: '도서관이나 카페처럼 누군가 옆에서 같이 일하는 느낌을 화면으로 흉내 낸 방이에요. 내 자리에 할 일을 적고 앉으면 함께 작업이 시작돼요. 여기 보이는 사람들은 가상 인물이에요.',
+  why: '다른 사람이 옆에 있기만 해도 일이 더 잘되는 경우가 많아요. 말을 걸지 않아도 "누가 보고 있다"는 느낌이 딴짓을 줄여줘요. 친구와 화상 통화를 켜두고 각자 일하는 것도 같은 방법이에요.',
+  oname: '바디 더블링 (Body doubling)',
+  origin: 'ADHD가 있는 사람들 사이에서 쓰이기 시작한 말이에요. 옆에 있어 주는 사람을 영화의 대역 배우(body double)에 빗댔어요. 요즘은 온라인 코워킹 서비스로도 많이 쓰여요.',
+  prompt: '\'함께 집중하는 방\' HTML을 만들어줘. 자리 6개 중 5개에 가상 인물이 앉아서 각자 할 일과 작업 시간이 1초씩 올라가고, 가끔 \'물 마시러 감\' 같은 상태로 바뀌게 해줘. 남은 한 자리는 내 자리야. 할 일을 적고 \'자리에 앉기\'를 누르면 내 타이머도 같이 올라가게 해줘. 사람 이름 첫 글자 아이콘은 넣지 말고 작업 중이면 파란 점, 자리 비움이면 회색 점으로만 표시해줘.',
+  render(el) {
+    const AWAY = ['물 마시러 감', '스트레칭 중', '잠깐 자리 비움'];
+    const ppl = [['지은', '논문 3장 읽기'], ['민호', '웹사이트 수정'], ['하린', '일러스트 채색'], ['도윤', '영상 컷 편집'], ['서연', '번역 원고 마무리']].map(([n, t]) => ({ n, t, s: 300 + Math.floor(Math.random() * 3000), away: 0, ai: 0 }));
+    let me = null;
+    el.innerHTML = `<div class="stack">
+      <div class="row between"><b>지금 <span class="num blue-t" id="n"></span>명이 함께 작업 중</b><span class="label">가상 인물이에요</span></div>
+      <div class="room" id="room"></div>
+      <form class="addrow" id="f"><input class="input" id="txt" value="원고 1장 수정" placeholder="내가 할 일" aria-label="내 할 일"><button class="btn primary" id="sit">자리에 앉기</button></form>
+      <div class="box blue"><b>진짜 친구와 같이 하고 싶다면</b><p class="sub" style="margin:6px 0 0">HTML 파일은 내 컴퓨터 안에서만 돌아가서 다른 사람과 연결이 안 돼요. 같은 걸 Claude 아티팩트로 만들면 데이터가 서버에 저장돼서 친구들과 같은 방을 볼 수 있어요.</p></div>
+    </div>`;
+    const draw = () => {
+      $('#room', el).innerHTML = ppl.map(p => `<div class="seat ${p.away ? 'away' : ''}"><div class="row" style="gap:8px"><i class="sdot"></i><b>${p.n}</b></div><span class="sub">${esc(p.t)}</span><span class="num label">${p.away ? AWAY[p.ai] : mmss(p.s) + '째 집중'}</span></div>`).join('') +
+        `<div class="seat me"><div class="row" style="gap:8px"><i class="sdot ${me ? '' : 'off'}"></i><b>내 자리</b></div><span class="sub">${me ? esc(me.t) : '할 일을 적고 앉아요'}</span><span class="num label">${me ? mmss(me.s) + '째 집중' : '비어 있음'}</span></div>`;
+      $('#n', el).textContent = ppl.filter(p => !p.away).length + (me ? 1 : 0);
+    };
+    every(() => { ppl.forEach(p => { if (p.away) p.away--; else { p.s++; if (Math.random() < .004) { p.away = 20 + Math.floor(Math.random() * 40); p.ai = Math.floor(Math.random() * 3); } } }); if (me) me.s++; draw(); }, 1000);
+    el.onsubmit = e => { e.preventDefault(); if (me) { me = null; $('#sit', el).textContent = '자리에 앉기'; } else { me = { t: $('#txt', el).value.trim() || '내 작업', s: 0 }; $('#sit', el).textContent = '일어나기'; } draw(); };
+    draw();
+  }
+});
+
+/* ========== 기록하기 ========== */
+const TR = ['외주 작업', '내 작업', '연락·행정', '쉬기'];
+tool({
+  slug: 'tracker', stage: '기록하기', title: '시간 기록기',
+  desc: '버튼 하나로 지금 하는 일의 시간을 재고 하루를 막대로 봐요.',
+  tags: ['시간 감각이 없음'],
+  lede: '지금 하는 일의 버튼을 누르면 시간이 재지고, 다른 버튼을 누르면 자동으로 넘어가요. 계획이 아니라 실제로 어디에 썼는지를 남겨요. 일주일 합계가 나와서 외주 작업 시간을 정산할 때도 쓸 수 있어요.',
+  why: '사람은 자기가 쓴 시간을 잘 기억하지 못해요. "하루 종일 작업했다"고 느껴도 기록해 보면 실제 집중 작업은 두세 시간인 경우가 많아요. 진짜 숫자를 알아야 다음 계획을 현실에 맞게 세울 수 있어요.',
+  oname: '시간 기록 (Time log)',
+  origin: '경영학자 피터 드러커가 『자기경영노트』에서 가장 먼저 권한 습관이에요. 시간을 관리하려면 먼저 시간을 기록하고, 그다음에 줄일 것을 찾으라고 했어요.',
+  prompt: '시간 기록 HTML을 만들어줘. \'외주 작업, 내 작업, 연락·행정, 쉬기\' 버튼이 있고 하나를 누르면 그 일의 시간이 재지기 시작하고 다른 버튼을 누르면 자동으로 바뀌게 해줘. 아래에는 오늘 하루를 가로 막대 타임라인으로 보여주고, 종류별 오늘 합계와 이번 주 합계를 보여줘.',
+  seed: () => {
+    const now = Date.now(), m = 6e4, log = [[3, 220, 190], [0, 190, 110], [2, 110, 85], [1, 85, 40]].map(([c, a, b]) => ({ c, s: now - a * m, e: now - b * m }));
+    for (let d = 1; d <= 3; d++) { const b = addDays(today0(), -d); [[0, 10, 13], [2, 14, 15], [1, 15, 17.5]].forEach(([c, a, z]) => log.push({ c, s: +b + a * 36e5, e: +b + z * 36e5 })); }
+    return { log, run: null };
+  },
+  empty: () => ({ log: [], run: null }),
+  render(el, S, save) {
+    el.innerHTML = `<div class="stack">
+      <div class="trk" id="cats"></div>
+      <div class="box gray row between"><div><div class="big" id="live">00:00:00</div><div class="sub" id="liveL"></div></div><button class="btn" id="stop">멈추기</button></div>
+      <div><div class="row between" style="margin-bottom:8px"><b>오늘 하루</b><span class="label">8시~24시</span></div><div class="tl" id="tl"></div><div class="ticks num"><span>8</span><span>12</span><span>16</span><span>20</span><span>24</span></div></div>
+      <ul class="items" id="log"></ul>
+      <div class="box blue"><div class="label blue-t">이번 주 합계</div><div class="stack" style="gap:6px;margin-top:8px" id="wk"></div><p class="hint" style="margin-top:10px">외주 정산할 때 이 숫자를 그대로 쓰면 돼요.</p></div>
+    </div>`;
+    const all = () => S.log.concat(S.run ? [{ c: S.run.c, s: S.run.s, e: Date.now() }] : []);
+    const tot = from => { const t = [0, 0, 0, 0]; all().forEach(x => { const s = Math.max(x.s, from); if (x.e > s) t[x.c] += x.e - s; }); return t; };
+    const fmt = ms => { const s = Math.floor(ms / 1000); return [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(pad).join(':'); };
+    const live = () => { $('#live', el).textContent = S.run ? fmt(Date.now() - S.run.s) : '00:00:00'; $('#liveL', el).textContent = S.run ? TR[S.run.c] + ' 기록 중' : '버튼을 눌러 기록을 시작하세요'; $('#stop', el).hidden = !S.run; };
+    const draw = () => {
+      const t = tot(+today0()), w = tot(+mondayOf());
+      $('#cats', el).innerHTML = TR.map((n, i) => `<button class="trk-b ${S.run && S.run.c === i ? 'on' : ''}" data-c="${i}"><span class="row" style="gap:8px"><i class="dot" style="background:var(--dp${i + 1})"></i><b>${n}</b></span><span class="num">${hm(t[i] / 6e4)}</span></button>`).join('');
+      const d0 = today0(); d0.setHours(8); const span = 16 * 36e5, L = all().filter(x => x.e > +today0());
+      $('#tl', el).innerHTML = L.map(x => { const l = Math.max(0, (x.s - d0) / span), r = Math.min(1, (x.e - d0) / span); return r > l ? `<span style="left:${l * 100}%;width:${(r - l) * 100}%;background:var(--dp${x.c + 1})"></span>` : ''; }).join('');
+      $('#log', el).innerHTML = L.slice().reverse().map((x, i) => `<li class="item"><i class="dot" style="background:var(--dp${x.c + 1})"></i><span class="grow">${TR[x.c]} <span class="sub num">${hhmm(new Date(x.s))}~${i === 0 && S.run ? '지금' : hhmm(new Date(x.e))}</span></span><span class="num sub" style="padding-right:8px">${hm((x.e - x.s) / 6e4)}</span></li>`).join('') || '<li class="hint">오늘 기록이 아직 없어요.</li>';
+      $('#wk', el).innerHTML = TR.map((n, i) => `<div class="row between"><span>${n}</span><b class="num">${hm(w[i] / 6e4)}</b></div>`).join('');
+      live();
+    };
+    const sw = c => { const now = Date.now(); if (S.run) S.log.push({ c: S.run.c, s: S.run.s, e: now }); S.run = (S.run && S.run.c === c) || c === null ? null : { c, s: now }; save(); draw(); };
+    $('#cats', el).onclick = e => { const b = e.target.closest('[data-c]'); if (b) sw(+b.dataset.c); };
+    $('#stop', el).onclick = () => sw(null);
+    every(live, 1000); every(draw, 30000);
+    draw();
+  }
+});
+
+tool({
+  slug: 'streak', stage: '기록하기', title: '매일 칸 채우기',
+  desc: '습관을 한 날마다 칸을 채워요. 하루 빠져도 기록은 그대로예요.',
+  tags: ['꾸준히 못 함', '성취감이 없음'],
+  lede: '하고 싶은 습관을 정하고 한 날마다 칸을 하나씩 채워요. 18주가 한 화면에 보여서 빈칸을 메우고 싶어져요. 하루 빠져도 지금까지 채운 칸은 그대로 남아요.',
+  why: '기록이 쌓인 모양 자체가 보상이 돼요. "오늘도 한 칸" 하는 작은 동기가 매일 생겨요. 습관이 자동으로 굳는 데 평균 두 달 정도 걸리고, 하루 빠뜨리는 건 결과에 거의 영향이 없다는 연구가 있어요. 그래서 끊긴 날을 혼내지 않고 이번 달에 채운 칸을 같이 보여줘요.',
+  oname: '잔디 심기 · 체인 끊지 않기',
+  origin: '깃허브가 코드를 올린 날을 초록 칸으로 보여주는 걸 개발자들이 "잔디 심기"라고 불러요. 코미디언 제리 사인펠드가 매일 글을 쓴 날 달력에 X를 치고 "체인을 끊지 마라"고 했다는 이야기도 같은 원리예요.',
+  prompt: '습관 칸 채우기 HTML을 만들어줘. 습관을 여러 개 추가할 수 있고 습관을 고르면 최근 18주가 깃허브 잔디처럼 칸으로 보이게 해줘. \'오늘 칸 채우기\'를 누르면 오늘 칸이 파란색이 되고, 지난 칸도 눌러서 고칠 수 있게 해줘. 전체 채운 날, 이번 달 채운 날, 지금 이어지는 날을 보여주고 하루 빠졌을 때는 혼내는 말 대신 부드러운 문구를 보여줘.',
+  seed: () => {
+    let s = 11; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+    const mk = (n, p) => { const d = {}; for (let i = 1; i < 120; i++) if (rnd() < p) d[ago(i)] = 1; return { id: uid(), n, d }; };
+    const H = [mk('아침 스트레칭', .7), mk('작업 일지 한 줄', .55), mk('밤 12시 전에 눕기', .45)];
+    return { habits: H, sel: H[0].id };
+  },
+  empty: () => ({ habits: [], sel: null }),
+  render(el, S, save) {
+    const draw = () => {
+      const h = S.habits.find(x => x.id === S.sel) || S.habits[0];
+      if (h) S.sel = h.id;
+      const t0 = today0(), tk = dkey(), start = addDays(mondayOf(), -17 * 7);
+      let grid = '', total = 0, month = 0, streak = 0;
+      if (h) {
+        for (let i = 0; i < 18 * 7; i++) { const d = addDays(start, i), k = dkey(d); grid += `<button class="sc ${h.d[k] ? 'on' : ''} ${k === tk ? 'td' : ''} ${d > t0 ? 'fut' : ''}" data-k="${k}" aria-label="${d.getMonth() + 1}월 ${d.getDate()}일 ${h.d[k] ? '채움' : '비어 있음'}"></button>`; }
+        total = Object.keys(h.d).length; month = Object.keys(h.d).filter(k => k.slice(0, 7) === tk.slice(0, 7)).length;
+        let d = new Date(t0); if (!h.d[dkey(d)]) d = addDays(d, -1); while (h.d[dkey(d)]) { streak++; d = addDays(d, -1); }
+      }
+      const filledToday = h && h.d[tk], yest = h && h.d[ago(1)];
+      const msg = !h ? '' : filledToday ? `오늘 칸을 채웠어요. ${streak}일째 이어지는 중이에요.` : yest ? `어제까지 ${streak}일 이어졌어요. 오늘도 한 칸 채워볼까요?` : '어제 비었어도 괜찮아요. 지금까지 채운 칸은 그대로 있어요.';
+      el.innerHTML = `<div class="stack">
+        <div class="pills" id="hs">${S.habits.map(x => `<button data-id="${x.id}" aria-pressed="${x.id === S.sel}">${esc(x.n)}</button>`).join('')}</div>
+        <form class="addrow" id="f"><input class="input" placeholder="새 습관 (예: 물 2L 마시기)" aria-label="새 습관"><button class="btn">추가</button></form>
+        ${h ? `<div class="box gray stack">
+          <div class="row between"><button class="btn ${filledToday ? 'weak' : 'primary'}" id="today">${filledToday ? '오늘 칸 채움 (취소하려면 누르기)' : '오늘 칸 채우기'}</button><button class="btn sm" id="delh">이 습관 지우기</button></div>
+          <p class="sub" style="margin:0">${msg}</p>
+          <div class="scwrap"><div class="scg"><div class="scd">${['월', '', '수', '', '금', '', '일'].map(x => `<span>${x}</span>`).join('')}</div><div class="sc-grid" id="g">${grid}</div></div></div>
+        </div>
+        <div class="stats"><div class="stat"><b>${total}일</b><span>전체 채운 날</span></div><div class="stat"><b>${month} / ${t0.getDate()}</b><span>이번 달</span></div><div class="stat"><b>${streak}일</b><span>지금 이어지는 날</span></div></div>` : '<p class="hint">위에서 습관을 하나 추가해 보세요.</p>'}
+      </div>`;
+      const w = $('.scwrap', el); if (w) w.scrollLeft = 9999;
+    };
+    el.onsubmit = e => { e.preventDefault(); const v = $('#f input', el).value.trim(); if (!v) return; const h = { id: uid(), n: v, d: {} }; S.habits.push(h); S.sel = h.id; save(); draw(); };
+    el.onclick = e => {
+      const p = e.target.closest('#hs button'); if (p) { S.sel = p.dataset.id; save(); draw(); return; }
+      const h = S.habits.find(x => x.id === S.sel); if (!h) return;
+      const c = e.target.closest('.sc'); const k = c ? c.dataset.k : e.target.id === 'today' ? dkey() : null;
+      if (k) { if (h.d[k]) delete h.d[k]; else { h.d[k] = 1; if (k === dkey()) chime(1, 660); } save(); draw(); return; }
+      if (e.target.id === 'delh') { S.habits = S.habits.filter(x => x !== h); S.sel = S.habits[0] ? S.habits[0].id : null; save(); draw(); }
+    };
+    draw();
+  }
+});
+
+tool({
+  slug: 'done', stage: '기록하기', title: '해낸 일 목록',
+  desc: '할 일 대신 이미 끝낸 일을 적어 쌓아요.',
+  tags: ['성취감이 없음'],
+  lede: '할 일 목록의 반대예요. 끝낸 일을 그때그때 한 줄씩 적어요. 계획에 없던 일, 아주 작은 일도 다 적어요. 하루 끝에는 오늘을 한 줄로 남기고, 지난 7일 동안 쌓인 개수도 막대로 볼 수 있어요.',
+  why: '할 일 목록은 늘 남은 일을 보여줘서 하루가 실패처럼 느껴지기 쉬워요. 해낸 일을 적으면 실제로 한 일이 눈에 보이고, 작은 진전을 알아차린 날은 다음 일을 할 의욕도 높아져요.',
+  oname: '던 리스트 (Done list) · 전진의 법칙',
+  origin: '하버드 경영대학원 테레사 애머빌 교수가 직장인 일기 1만 2천 건을 분석해 『전진의 법칙』을 썼어요. 사람들이 의욕이 가장 높았던 날은 큰 성과를 낸 날이 아니라 작은 진전을 느낀 날이었다고 해요.',
+  prompt: '\'해낸 일 목록\' HTML을 만들어줘. 방금 끝낸 일을 적고 Enter를 누르면 시각과 함께 오늘 목록에 쌓이게 해줘. 오늘 개수를 크게 보여주고, \'오늘을 한 줄로\' 50자 입력칸도 넣어줘. 아래에는 최근 7일 동안 날짜별로 몇 개 했는지 막대그래프로 보여줘.',
+  seed: () => {
+    const days = {}; [4, 7, 3, 6, 9, 5].forEach((n, i) => days[ago(6 - i)] = Array.from({ length: n }, () => ({ t: '', x: '' })));
+    days[dkey()] = [{ t: '09:12', x: '어제 미룬 메일 답장' }, { t: '10:40', x: '시안 색 수정' }, { t: '11:05', x: '빨래 돌림' }];
+    return { days, line: { [ago(1)]: '납품 끝! 저녁에 떡볶이.' } };
+  },
+  empty: () => ({ days: {}, line: {} }),
+  render(el, S, save) {
+    const draw = () => {
+      const tk = dkey(), L = S.days[tk] || [], ds = Array.from({ length: 7 }, (_, i) => addDays(new Date(), i - 6)), max = Math.max(1, ...ds.map(d => (S.days[dkey(d)] || []).length));
+      el.innerHTML = `<div class="stack">
+        <div class="row" style="align-items:baseline;gap:6px"><span class="big blue-t">${L.length}</span><span class="sub">개를 오늘 해냈어요</span></div>
+        <form class="addrow" id="f"><input class="input" placeholder="방금 끝낸 일 (예: 메일 하나 보냄)" aria-label="끝낸 일" autocomplete="off"><button class="btn primary">기록</button></form>
+        <ul class="items">${L.slice().reverse().map(i => `<li class="item"><span class="num label">${i.t}</span><span class="grow">${esc(i.x)}</span></li>`).join('') || '<li class="hint">아주 작은 일부터 적어보세요.</li>'}</ul>
+        <div><label class="label" for="ln">오늘을 한 줄로</label><input class="input" id="ln" maxlength="50" value="${esc(S.line[tk] || '')}" placeholder="50자까지" style="margin-top:6px"></div>
+        <div class="box gray"><b>최근 7일</b><div class="dbars">${ds.map((d, i) => { const n = (S.days[dkey(d)] || []).length; return `<div class="${i === 6 ? 'td' : ''}"><small class="num">${n}</small><span style="height:${n / max * 80 + 4}px"></span><small>${WD[d.getDay()]}</small></div>`; }).join('')}</div></div>
+      </div>`;
+    };
+    el.onsubmit = e => { e.preventDefault(); const v = $('#f input', el).value.trim(); if (!v) return; (S.days[dkey()] = S.days[dkey()] || []).push({ t: hhmm(new Date()), x: v }); save(); draw(); $('#f input', el).focus(); };
+    el.oninput = e => { if (e.target.id === 'ln') { S.line[dkey()] = e.target.value; save(); } };
+    draw();
+  }
+});
+
+tool({
+  slug: 'condition', stage: '기록하기', title: '컨디션 일지',
+  desc: '잠든 시각, 일어난 시각, 컨디션만 적고 2주 흐름을 봐요.',
+  tags: ['쉬지를 못함', '시간 감각이 없음'],
+  lede: '매일 아침 잠든 시각과 일어난 시각, 오늘 컨디션을 다섯 단계 중에 골라요. 2주치가 모이면 잠과 컨디션이 어떻게 이어지는지 숫자로 보여줘요.',
+  why: '출퇴근이 없으면 잠드는 시각이 조금씩 밀려도 모르고 지나가요. 2주를 나란히 놓고 보면 밀리는 게 보이고, 적게 잔 다음 날 컨디션이 어떤지도 알 수 있어요. 패턴을 알면 마감 다음 날처럼 무너지기 쉬운 날에 미리 쉬는 시간을 넣을 수 있어요.',
+  oname: '수면 일지 (Sleep diary)',
+  origin: '수면 클리닉에서 불면 상담을 할 때 가장 먼저 쓰게 하는 기록이에요. 잠든 시각과 깬 시각, 낮 컨디션을 2주 정도 적어서 패턴을 찾아요.',
+  prompt: '컨디션 일지 HTML을 만들어줘. 오늘 잠든 시각과 일어난 시각을 입력하고 컨디션을 \'최악, 별로, 보통, 좋음, 최고\' 다섯 버튼 중에 고르게 해줘. 최근 14일을 날짜별로 수면 시간 막대와 컨디션으로 보여주고, 평균 수면 시간과 \'적게 잔 날과 많이 잔 날의 컨디션 평균\'을 비교해서 알려줘.',
+  seed: () => { const d = {}; [['00:30', '08:00', 4], ['01:50', '08:20', 3], ['02:40', '08:30', 2], ['00:10', '07:40', 4], ['23:50', '07:30', 5], ['03:00', '08:10', 1], ['01:00', '08:30', 3], ['00:20', '07:50', 4], ['02:10', '08:00', 2], ['00:40', '08:20', 4], ['23:40', '07:20', 4], ['01:30', '08:40', 3], ['00:30', '08:10', 4]].forEach((v, i) => d[ago(13 - i)] = { b: v[0], w: v[1], c: v[2] }); return { d }; },
+  empty: () => ({ d: {} }),
+  render(el, S, save) {
+    const CL = ['최악', '별로', '보통', '좋음', '최고'];
+    let sel = dkey();
+    const toM = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
+    const dur = v => (toM(v.w) - toM(v.b) + 1440) % 1440;
+    const draw = () => {
+      const v = S.d[sel] || { b: '00:30', w: '08:00', c: 0 }, sd = parseD(sel);
+      const days = Array.from({ length: 14 }, (_, i) => ago(13 - i)), recs = days.map(k => [k, S.d[k]]).filter(x => x[1]);
+      const avg = recs.length ? recs.reduce((a, [, r]) => a + dur(r), 0) / recs.length : 0;
+      const lo = recs.filter(([, r]) => dur(r) < 390 && r.c), hi = recs.filter(([, r]) => dur(r) >= 390 && r.c), ac = a => (a.reduce((s, [, r]) => s + r.c, 0) / a.length).toFixed(1);
+      el.innerHTML = `<div class="stack">
+        <div class="box gray stack">
+          <b>${sel === dkey() ? '오늘' : `${sd.getMonth() + 1}월 ${sd.getDate()}일`} 기록</b>
+          <div class="cols2"><label class="stack" style="gap:4px"><span class="label">잠든 시각</span><input class="input" type="time" data-f="b" value="${v.b}"></label><label class="stack" style="gap:4px"><span class="label">일어난 시각</span><input class="input" type="time" data-f="w" value="${v.w}"></label></div>
+          <div class="label">컨디션</div>
+          <div class="seg" id="cs">${CL.map((n, i) => `<button data-c="${i + 1}" aria-pressed="${v.c === i + 1}">${n}</button>`).join('')}</div>
+        </div>
+        <div class="stats"><div class="stat"><b>${recs.length ? hm(avg) : '-'}</b><span>평균 수면</span></div>${lo.length && hi.length ? `<div class="stat"><b class="red-t">${ac(lo)}</b><span>6시간 반보다 적게 잔 날 컨디션</span></div><div class="stat"><b class="blue-t">${ac(hi)}</b><span>많이 잔 날 컨디션</span></div>` : ''}</div>
+        <div class="stack" style="gap:4px">${days.slice().reverse().map(k => { const r = S.d[k], d = parseD(k), m = r ? dur(r) : 0; return `<button class="cd-row ${k === sel ? 'on' : ''}" data-k="${k}"><span class="num label">${d.getMonth() + 1}/${d.getDate()} ${WD[d.getDay()]}</span><span class="cd-bar"><span class="${m && m < 390 ? 'short' : ''}" style="width:${Math.min(100, m / 600 * 100)}%"></span></span><span class="num sub">${r ? hm(m) : '-'}</span><span class="tag ${r && r.c && r.c <= 2 ? 'red' : r && r.c >= 4 ? 'blue' : ''}">${r && r.c ? CL[r.c - 1] : '기록 없음'}</span></button>`; }).join('')}</div>
+        <p class="hint">날짜를 누르면 그날 기록을 고칠 수 있어요. 빨간 막대는 6시간 반보다 적게 잔 날이에요.</p>
+      </div>`;
+    };
+    const rec = () => (S.d[sel] = S.d[sel] || { b: '00:30', w: '08:00', c: 0 });
+    el.onchange = e => { const f = e.target.dataset.f; if (!f || !e.target.value) return; rec()[f] = e.target.value; save(); draw(); };
+    el.onclick = e => {
+      const c = e.target.closest('#cs button'); if (c) { rec().c = +c.dataset.c; save(); draw(); return; }
+      const r = e.target.closest('.cd-row'); if (r) { sel = r.dataset.k; draw(); }
+    };
+    draw();
+  }
+});
+
+/* ========== 돌아보기 ========== */
+tool({
+  slug: 'estimate', stage: '돌아보기', title: '예상 vs 실제',
+  desc: '예상 시간과 실제 걸린 시간을 비교해 내 보정값을 찾아요.',
+  tags: ['시간 감각이 없음'],
+  lede: '일을 시작하기 전에 예상 시간을, 끝나고 실제 걸린 시간을 적어요. 기록이 쌓이면 내가 보통 예상의 몇 배가 걸리는지 계산해서 다음 예상을 고쳐줘요. 견적이나 마감을 잡을 때 특히 쓸모 있어요.',
+  why: '사람은 거의 항상 일이 걸리는 시간을 짧게 예측해요. 의지로 고치기는 어렵지만 내 평균 배율을 알면 예상에 곱하기만 하면 돼서 일정이 훨씬 정확해져요.',
+  oname: '계획 오류 (Planning fallacy)',
+  origin: '심리학자 대니얼 카너먼과 아모스 트버스키가 1979년에 이름 붙인 현상이에요. 비슷한 일을 여러 번 해봤어도 다음 일은 이번엔 빨리 끝날 거라고 믿는 경향을 말해요.',
+  prompt: '예상 vs 실제 시간 비교 HTML을 만들어줘. 할 일, 예상 분, 실제 분을 기록하는 표를 만들고 행마다 배율(실제÷예상)을 보여줘. 평균 배율을 크게 보여주고, 새 일의 예상 시간을 넣으면 평균 배율을 곱한 \'보정한 예상 시간\'을 계산해주는 칸도 넣어줘.',
+  seed: () => ({ r: [['블로그 글 1편', 60, 110], ['로고 시안 2개', 120, 180], ['메일 답장', 15, 30], ['영상 컷 편집', 90, 160], ['견적서 작성', 20, 25]] }),
+  empty: () => ({ r: [] }),
+  render(el, S, save) {
+    let guess = 60;
+    const draw = () => {
+      const avg = S.r.length ? S.r.reduce((a, r) => a + r[2] / r[1], 0) / S.r.length : 1;
+      el.innerHTML = `<div class="stack">
+        <div class="cols2"><div class="box gray"><div class="label">내 평균 배율</div><div class="big ${avg > 1.1 ? 'red-t' : ''}" style="margin:4px 0">×${avg.toFixed(2)}</div><p class="sub" style="margin:0">${avg > 1.1 ? `예상보다 평균 ${Math.round((avg - 1) * 100)}% 더 걸려요` : avg < .9 ? '예상보다 빨리 끝내는 편이에요' : '예상이 꽤 정확해요'}</p></div>
+        <div class="box blue"><div class="label blue-t">새 일 예상 보정하기</div><div class="row" style="margin-top:8px;flex-wrap:nowrap"><input class="input" type="number" min="1" id="g" value="${guess}" style="width:90px" aria-label="예상 분"><span class="sub">분 예상이면</span></div><div class="mid blue-t" style="margin-top:8px" id="fx">${hm(guess * avg)} 잡기</div></div></div>
+        <ul class="items">${S.r.map((r, i) => { const x = r[2] / r[1]; return `<li class="item"><span class="grow"><b>${esc(r[0])}</b><br><span class="sub num">예상 ${r[1]}분 → 실제 ${r[2]}분</span></span><span class="num ${x > 1.3 ? 'red-t' : ''}" style="font-weight:700">×${x.toFixed(2)}</span><button class="x" data-del="${i}" aria-label="삭제">×</button></li>`; }).join('')}</ul>
+        <form class="est-f" id="f"><input class="input" name="t" placeholder="할 일" aria-label="할 일"><input class="input" name="e" type="number" min="1" placeholder="예상(분)" aria-label="예상 분"><input class="input" name="a" type="number" min="1" placeholder="실제(분)" aria-label="실제 분"><button class="btn primary">추가</button></form>
+      </div>`;
+      el._avg = avg;
+    };
+    el.oninput = e => { if (e.target.id !== 'g') return; guess = +e.target.value || 0; $('#fx', el).textContent = hm(guess * el._avg) + ' 잡기'; };
+    el.onclick = e => { const d = e.target.closest('[data-del]'); if (!d) return; S.r.splice(+d.dataset.del, 1); save(); draw(); };
+    el.onsubmit = e => { e.preventDefault(); const f = e.target, t = f.t.value.trim(), ee = +f.e.value, a = +f.a.value; if (!t || !ee || !a) return; S.r.push([t, ee, a]); save(); draw(); };
+    draw();
+  }
+});
+
+tool({
+  slug: 'review', stage: '돌아보기', title: '주간 회고',
+  desc: '한 주 기록을 자동으로 모아 보고, 계속할 것·문제·시도할 것을 정리해요.',
+  tags: ['꾸준히 못 함', '성취감이 없음'],
+  lede: '한 주를 마무리하며 15분만 써요. 시간 기록기, 해낸 일 목록, 매일 칸 채우기, 집중 타이머에 남긴 이번 주 기록을 자동으로 모아서 보여줘요. 그걸 보면서 계속할 것, 문제였던 것, 다음 주에 시도할 것을 적어요.',
+  why: '한 주가 끝나면 "이번 주 별로였다" 같은 막연한 느낌만 남기 쉬워요. 숫자로 보면 실제로는 지난주보다 늘었거나 특정 요일만 무너졌다는 게 보여요. 문제만 적으면 반성문이 되니까 다음 주에 해볼 행동 하나로 바꾸는 게 핵심이에요.',
+  oname: 'KPT 회고 · 주간 리뷰',
+  origin: 'KPT는 일본 개발팀에서 시작된 회고법으로 Keep(계속할 것), Problem(문제), Try(시도할 것)의 머리글자예요. 주간 리뷰는 GTD에서 매주 한 번 목록을 전부 훑어보는 시간을 부르는 말이에요.',
+  prompt: '주간 회고 HTML을 만들어줘. 위에는 이번 주(월요일부터 오늘까지) 작업 시간, 해낸 일 개수, 습관 달성률, 집중 시간을 카드로 보여줘. 아래에는 \'계속할 것\', \'문제였던 것\', \'다음 주 시도\' 세 칸이 있고 칸마다 메모를 추가하고 지울 수 있게 해줘. 문제 메모에는 \'시도로 바꾸기\' 버튼을 넣어서 누르면 내용을 고쳐 시도 칸으로 옮길 수 있게 해줘.',
+  seed: () => ({ K: ['오전에 외주부터 끝내니 오후가 편했다', '운동 3번 감'], P: ['밤 12시 넘어 작업한 날 다음 날 망함', '메일을 수시로 확인함'], T: ['메일은 11시, 4시 두 번만 보기'] }),
+  empty: () => ({ K: [], P: [], T: [] }),
+  render(el, S, save) {
+    const COLS = [['K', '계속할 것', '잘돼서 유지할 것'], ['P', '문제였던 것', '아쉬웠던 것'], ['T', '다음 주 시도', '딱 한두 개만']];
+    const stats = () => {
+      const mon = +mondayOf(), now = Date.now(), elapsed = Math.floor((now - mon) / 864e5) + 1;
+      const tr = store.get('tracker', { log: [], run: null }); let work = 0;
+      tr.log.concat(tr.run ? [{ c: tr.run.c, s: tr.run.s, e: now }] : []).forEach(x => { if (x.c < 2) { const s = Math.max(x.s, mon); if (x.e > s) work += x.e - s; } });
+      const dn = store.get('done', { days: {} }); let done = 0; Object.entries(dn.days).forEach(([k, v]) => { if (+parseD(k) >= mon) done += v.length; });
+      const st = store.get('streak', { habits: [] }); let fill = 0; st.habits.forEach(h => Object.keys(h.d).forEach(k => { if (+parseD(k) >= mon) fill++; }));
+      const rate = st.habits.length ? Math.round(fill / (st.habits.length * elapsed) * 100) : null;
+      const tm = store.get('timer', { days: {} }); let foc = 0; Object.entries(tm.days).forEach(([k, v]) => { if (+parseD(k) >= mon) foc += v.m; });
+      return `<div class="rv-stats"><div class="stat"><b>${hm(work / 6e4)}</b><span>작업 시간 (시간 기록기)</span></div><div class="stat"><b>${done}개</b><span>해낸 일</span></div><div class="stat"><b>${rate == null ? '-' : rate + '%'}</b><span>습관 달성률</span></div><div class="stat"><b>${hm(foc)}</b><span>집중 타이머</span></div></div>`;
+    };
+    const draw = () => {
+      el.innerHTML = `<div class="stack">
+        <div class="row between"><b>이번 주 숫자</b><span class="label">월요일부터 오늘까지</span></div>
+        ${stats()}
+        <p class="hint">다른 도구에 기록한 내용이 자동으로 모여요. 처음엔 각 도구의 예시 기록이 보여요.</p>
+        <div class="kpt">${COLS.map(([k, n, s]) => `<section class="box gray kc" data-k="${k}"><div><b>${n}</b> <span class="label">${s}</span></div><ul class="items">${S[k].map((t, i) => `<li class="item kn"><span class="grow">${esc(t)}</span>${k === 'P' ? `<button class="btn sm weak" data-try="${i}">시도로 바꾸기</button>` : ''}<button class="x" data-del="${i}" aria-label="삭제">×</button></li>`).join('')}</ul><input class="input" placeholder="+ 적고 Enter" aria-label="${n} 메모 추가"></section>`).join('')}</div>
+      </div>`;
+    };
+    el.onclick = e => {
+      const col = e.target.closest('.kc'); if (!col) return; const k = col.dataset.k;
+      const d = e.target.closest('[data-del]'), t = e.target.closest('[data-try]');
+      if (d) { S[k].splice(+d.dataset.del, 1); save(); draw(); }
+      if (t) { const txt = S.P.splice(+t.dataset.try, 1)[0]; save(); draw(); const inp = $('[data-k="T"] input', el); inp.value = txt + ' → 다음엔 '; inp.focus(); }
+    };
+    el.onkeydown = e => {
+      if (e.key !== 'Enter' || e.isComposing || e.target.tagName !== 'INPUT') return;
+      const v = e.target.value.trim(), k = e.target.closest('.kc').dataset.k; if (!v) return;
+      S[k].push(v); save(); draw(); $(`[data-k="${k}"] input`, el).focus();
+    };
+    draw();
+  }
+});
+
+/* ========== 지키기 ========== */
+tool({
+  slug: 'breakmenu', stage: '지키기', title: '휴식 메뉴판',
+  desc: '5분, 15분, 30분 쉬는 법을 메뉴처럼 골라 쉬어요.',
+  tags: ['쉬지를 못함', '집중이 안 됨'],
+  lede: '식당 메뉴판처럼 쉬는 시간 길이별로 할 수 있는 휴식이 정리돼 있어요. 직접 고르거나 "아무거나"를 누르면 하나 골라주고, 그 시간만큼 타이머가 돌아가요. 나만의 메뉴도 추가할 수 있어요.',
+  why: '쉬는 방법을 미리 정해두지 않으면 가장 쉬운 휴대폰으로 손이 가요. 휴대폰은 뇌를 계속 자극해서 쉬어도 피곤해요. 몸을 움직이거나 눈을 쉬게 하는 메뉴를 미리 적어두면 진짜 휴식을 고르기 쉬워져요.',
+  oname: '의도적 휴식 · 20-20-20 규칙',
+  origin: '휴식 연구자 알렉스 수정 김 방은 책 『Rest』에서 휴식도 계획해야 하는 기술이라고 말해요. 메뉴에 있는 20-20-20 규칙은 20분마다 20초 동안 20피트(약 6미터) 먼 곳을 보라는 안과 의사들의 권고예요.',
+  prompt: '휴식 메뉴판 HTML을 만들어줘. \'5분, 15분, 30분\' 탭마다 휴식 활동이 메뉴처럼 나열되고, 하나를 고르거나 \'아무거나\'를 누르면 그 휴식이 크게 보이면서 그 시간만큼 타이머가 돌아가게 해줘. 끝나면 소리로 알려주고, 메뉴는 내가 추가하고 지울 수 있게 해줘.',
+  seed: () => ({ m: [['창밖 6미터 먼 곳 20초 보기', '물 한 컵 천천히 마시기', '4초 들이쉬고 4초 참고 4초 내쉬기', '어깨 돌리기 10번', '좋아하는 노래 한 곡 듣기'], ['동네 한 바퀴 산책', '설거지 하기', '차 한 잔 우려 마시기', '눈 감고 누워 있기'], ['낮잠 20분', '샤워하기', '간단히 요리해서 먹기', '스트레칭 영상 따라 하기']] }),
+  empty: () => ({ m: [[], [], []] }),
+  render(el, S, save) {
+    const LEN = [5, 15, 30];
+    let tab = 0, pick = null, clk = null;
+    const draw = () => {
+      el.innerHTML = `<div class="stack">
+        ${pick ? `<div class="box blue" style="text-align:center;padding:24px"><div class="label blue-t">${LEN[pick[0]]}분 휴식</div><div class="mid" style="margin:6px 0 10px">${esc(S.m[pick[0]][pick[1]] || '')}</div><div class="big num" id="bclk">${mmss(LEN[pick[0]] * 60)}</div><p class="sub" style="margin:8px 0 14px">휴대폰은 내려놓고 다녀오세요</p><div class="row" style="justify-content:center"><button class="btn primary" id="bgo">시작</button><button class="btn" id="bdone">다녀왔어요</button></div><label class="fast" style="margin:12px auto 0"><input type="checkbox" id="fast"> 체험용 빨리 감기</label></div>` : ''}
+        <div class="seg" id="tabs">${LEN.map((l, i) => `<button data-t="${i}" aria-pressed="${i === tab}">${l}분</button>`).join('')}</div>
+        <ul class="items">${S.m[tab].map((x, i) => `<li class="item"><span class="grow">${esc(x)}</span><button class="btn sm weak" data-p="${i}">이걸로 쉬기</button><button class="x" data-del="${i}" aria-label="삭제">×</button></li>`).join('')}</ul>
+        <button class="btn block" id="any">${LEN[tab]}분 메뉴 중 아무거나 골라줘</button>
+        <form class="addrow" id="f"><input class="input" placeholder="나만의 ${LEN[tab]}분 휴식 추가" aria-label="휴식 메뉴 추가"><button class="btn">추가</button></form>
+      </div>`;
+    };
+    const choose = i => { if (clk) clk.stop(); clk = null; pick = [tab, i]; draw(); scrollTo({ top: el.getBoundingClientRect().top + scrollY - 80, behavior: 'smooth' }); };
+    el.onclick = e => {
+      const t = e.target.closest('#tabs button'); if (t) { tab = +t.dataset.t; draw(); return; }
+      const p = e.target.closest('[data-p]'); if (p) { choose(+p.dataset.p); return; }
+      const d = e.target.closest('[data-del]'); if (d) { S.m[tab].splice(+d.dataset.del, 1); save(); draw(); return; }
+      if (e.target.id === 'any' && S.m[tab].length) choose(Math.floor(Math.random() * S.m[tab].length));
+      if (e.target.id === 'bgo') {
+        if (clk && clk.running) { clk.stop(); e.target.textContent = '이어서'; return; }
+        if (!clk) clk = Clock({ from: LEN[pick[0]] * 60, speed: () => $('#fast', el) && $('#fast', el).checked ? 60 : 1, tick: v => { const c = $('#bclk', el); if (c) c.textContent = mmss(v); }, done: () => { chime(3, 600); const b = $('#bgo', el); if (b) b.textContent = '끝났어요'; } });
+        clk.start(); e.target.textContent = '잠깐 멈춤';
+      }
+      if (e.target.id === 'bdone') { if (clk) clk.stop(); clk = null; pick = null; draw(); }
+    };
+    el.onsubmit = e => { e.preventDefault(); const v = $('#f input', el).value.trim(); if (!v) return; S.m[tab].push(v); save(); draw(); };
+    draw();
+  }
+});
+
+tool({
+  slug: 'sns', stage: '지키기', title: 'SNS 시간 예산',
+  desc: '하루 SNS 시간을 정해두고 볼 때마다 차감해요.',
+  tags: ['집중이 안 됨'],
+  lede: '하루에 쓸 SNS 시간을 정해두고 볼 때만 타이머를 켜요. 남은 예산이 막대로 줄어들고 다 쓰면 알려줘요. 금지가 아니라 정해진 만큼은 마음 편히 즐기는 방식이에요.',
+  why: '무조건 끊으려고 하면 오히려 더 생각나요. 예산을 정해두면 SNS를 보는 것도 계획의 일부가 돼서 죄책감이 줄고, 남은 시간이 보이니 스스로 멈추기 쉬워져요.',
+  oname: '시간 예산 (Time budget)',
+  origin: '돈 가계부처럼 시간에도 한도를 정해 쓰는 방식이에요. 칼 뉴포트도 『디지털 미니멀리즘』에서 SNS를 언제 얼마나 쓸지 미리 정해두라고 권해요.',
+  prompt: 'SNS 시간 예산 HTML을 만들어줘. 하루 예산(분)을 정하고 \'SNS 보는 중\' 버튼을 누르면 타이머가 돌면서 남은 예산 막대가 줄어들게 해줘. 남은 시간이 5분 이하면 막대를 빨간색으로 바꾸고 다 쓰면 경고 문구를 보여주고 오늘 쓴 기록을 목록으로 남겨줘. 날짜가 바뀌면 예산이 다시 채워지게 해줘.',
+  seed: () => ({ day: dkey(), budget: 30, used: 660, log: [{ at: '08:20', s: 360 }, { at: '12:45', s: 300 }] }),
+  empty: () => ({ day: dkey(), budget: 30, used: 0, log: [] }),
+  render(el, S, save) {
+    if (S.day !== dkey()) { S.day = dkey(); S.used = 0; S.log = []; save(); }
+    let base = 0;
+    el.innerHTML = `<div class="stack">
+      <div class="box gray"><div class="row between"><span class="label">오늘 남은 SNS 시간</span><label class="row label" style="gap:6px">하루 예산 <input class="input" type="number" id="bud" min="5" max="240" value="${S.budget}" style="width:76px;height:36px" aria-label="하루 예산 분">분</label></div>
+      <div class="big num" id="left" style="margin:8px 0 12px"></div><div class="bar" id="bw"><span id="bar"></span></div><p class="sub" id="msg" style="margin:10px 0 0"></p></div>
+      <button class="btn primary lg block" id="go">SNS 보는 중</button>
+      <label class="fast"><input type="checkbox" id="fast"> 체험용 빨리 감기 (1초가 1분)</label>
+      <div><b>오늘 쓴 기록</b><ul class="items" id="log" style="margin-top:8px"></ul></div>
+    </div>`;
+    const sw = Clock({ speed: () => $('#fast', el).checked ? 60 : 1, tick: v => { S.used = base + v; draw(); } });
+    const draw = () => {
+      const total = S.budget * 60, left = total - S.used;
+      $('#left', el).textContent = (left < 0 ? '-' : '') + mmss(Math.abs(left));
+      $('#left', el).className = 'big num ' + (left <= 300 ? 'red-t' : '');
+      $('#bw', el).className = 'bar ' + (left <= 300 ? 'red' : '');
+      $('#bar', el).style.width = Math.max(0, left / total * 100) + '%';
+      $('#msg', el).textContent = left <= 0 ? '오늘 예산을 다 썼어요. 내일 다시 채워져요.' : left <= 300 ? '5분도 안 남았어요. 지금 보는 것만 마무리해요.' : '정해진 만큼은 마음 편히 즐겨도 괜찮아요.';
+      $('#go', el).textContent = sw.running ? '그만 보기' : 'SNS 보는 중';
+      $('#go', el).className = 'btn lg block ' + (sw.running ? 'danger' : 'primary');
+      $('#log', el).innerHTML = S.log.slice().reverse().map(x => `<li class="item"><span class="num label">${x.at}</span><span class="grow">${Math.max(1, Math.round(x.s / 60))}분</span></li>`).join('') || '<li class="hint">아직 없어요.</li>';
+    };
+    $('#go', el).onclick = () => { if (sw.running) { sw.stop(); S.log.push({ at: hhmm(new Date()), s: sw.v }); save(); } else { base = S.used; sw.set(0); sw.start(); } draw(); };
+    $('#bud', el).onchange = e => { S.budget = Math.max(5, +e.target.value || 30); save(); draw(); };
+    every(() => { if (sw.running) save(); }, 5000);
+    draw();
+  }
+});
+
+/* 화면 부품: [이름, 영어 이름, 이 화면에서 어디, 그림 종류, 체험 화면에서 찾을 선택자] · 용어는 「화면 부품 사전」 기준 */
+const PARTS = {
+  capture: [['입력창', 'Input', '생각을 적고 Enter를 누르는 칸', 'input', '#f input'], ['리스트', 'List', '분류 전 생각이 쌓이는 목록', 'list', '.items'], ['버튼', 'Button', '할 일, 나중에, 버리기', 'button', '.acts .btn'], ['카드', 'Card', '아래 세 바구니. 칸마다 개수가 붙어요', 'card', '.bins .box'], ['빈 상태', 'Empty state', '분류 전 목록을 다 비우면 그 자리에 나오는 문구', 'empty', '.items .hint']],
+  waiting: [['통계 카드', 'Stat card', '맨 위 숫자 세 개', 'stat', '.stats .stat'], ['입력창', 'Input', '누구에게, 무엇을', 'input', '.wait-f .input'], ['리스트', 'List', '기다리는 일 목록. 오래된 순으로 정렬', 'list', '.items'], ['태그', 'Tag', 'n일째 표시. 3일이 넘으면 빨간색', 'tag', '.item .tag'], ['버튼', 'Button', '연락했어요, 받았어요', 'button', '.acts .btn']],
+  goals: [['진행바', 'Progress bar', '분기가 몇 % 지났는지 채워지는 막대. 보기만 하는 막대예요', 'progress', '.box.gray .bar'], ['슬라이더', 'Slider', '동그란 손잡이를 끌어서 값을 정하는 막대. 진행바와 달리 직접 움직여요', 'slider', '[data-p]'], ['인라인 편집', 'Inline edit', '목표 이름을 그 자리에서 바로 고치는 칸', 'inline', '[data-t]'], ['태그', 'Tag', '속도 괜찮아요 / 뒤처져요', 'tag', '.st .tag']],
+  matrix: [['그리드', 'Grid (2×2)', '화면을 네 칸으로 나눈 배치', 'grid', '.quads'], ['드롭다운', 'Select', '눌러서 목록 중 하나를 고르는 칸. 할 일을 넣을 칸 고르기', 'select', '#f select'], ['체크박스', 'Checkbox', '끝낸 일 표시', 'checkbox', '.quad input[type=checkbox]'], ['리스트', 'List', '칸마다 담긴 할 일', 'list', '.quad .items'], ['태그', 'Tag', '칸 설명. 지금 하기는 빨강, 일정 잡기는 파랑', 'tag', '.quad .tag']],
+  nine: [['체크박스', 'Checkbox', '칸마다 끝냈는지 표시', 'checkbox', '.slot input[type=checkbox]'], ['인라인 입력창', 'Inline input', '칸을 누르면 바로 글을 쓰는 입력창', 'inline', '.slot-t'], ['진행바', 'Progress bar', '9칸 중 몇 칸 끝냈는지 채워지는 막대', 'progress', '.bar'], ['섹션 제목', 'Section label', '큰 일 1, 중간 일 3, 작은 일 5', 'section', '.label']],
+  breakdown: [['강조 카드', 'Highlight card', '지금 할 것 하나만 크게', 'highlight', '.now'], ['진행바', 'Progress bar', '전체 단계 중 끝낸 비율', 'progress', '.bar'], ['체크리스트', 'Checklist', '체크박스가 달린 단계 목록', 'checklist', '.items'], ['순서 바꾸기 버튼', 'Reorder', '↑ 버튼으로 단계 위로 올리기', 'reorder', '[data-up]']],
+  dayplan: [['그리드', 'Grid', '30분짜리 칸 30개', 'grid', '#dp'], ['칩', 'Chip', '알약 모양 작은 버튼. 칠할 색(일 종류) 고르기', 'chip', '#br button'], ['드래그 칠하기', 'Drag to paint', '칸을 누른 채 끌어서 여러 칸 칠하기', 'drag', '.dp-s[data-c="1"]'], ['토글 버튼', 'Toggle', '누를 때마다 켜졌다 꺼지는 버튼. 시간 숫자', 'toggle', '.dp-h'], ['요약 카드', 'Summary card', '종류별 합계 시간', 'summary', '#sum']],
+  weekly: [['표', 'Table', '요일 × 오전·오후·저녁 칸', 'table', '.wk'], ['칩 + 배지', 'Chip · Badge', '일 종류 고르기와 옆의 칸 개수', 'badge', '#subs button'], ['입력창', 'Input', '일 종류 이름 바꾸기', 'input', '#rn'], ['강조 카드', 'Highlight card', '오늘 요일의 할 일', 'highlight', '.box.blue']],
+  backward: [['날짜 선택', 'Date picker', '누르면 달력이 뜨는 칸. 마감일 고르기', 'date', '#due'], ['카운터', 'D-day counter', 'D-16 같은 큰 숫자', 'counter', '.big'], ['알림 배너', 'Alert banner', '첫 단계 시작일 안내. 늦으면 빨간색', 'alert', '.stack > .box:nth-child(2)'], ['숫자 입력', 'Number input', '위아래 화살표로 숫자를 바꾸는 칸. 단계별 일수', 'number', '.days'], ['리스트', 'List', '거꾸로 계산된 단계와 날짜', 'list', '.items']],
+  week168: [['슬라이더', 'Slider', '손잡이를 끌어서 하루 몇 시간인지 정하는 막대', 'slider', 'input[type=range]'], ['진행바', 'Progress bar', '168시간 중 쓴 양. 넘치면 빨간색', 'progress', '#bw'], ['큰 숫자', 'Big number', '남은 시간', 'bignum', '#left']],
+  timer: [['세그먼트 컨트롤', 'Segmented control', '한 줄에 붙은 버튼 중 하나만 고르는 스위치. 2분만, 25분, 끝날 때까지', 'seg', '#modes'], ['원형 진행 링', 'Progress ring', '남은 시간만큼 줄어드는 동그라미', 'ring', '.ring'], ['버튼', 'Button', '시작, 잠깐 멈춤, 처음으로', 'button', '#go, #rs'], ['체크박스', 'Checkbox', '빨리 감기, 배경 소리', 'checkbox', '.fast'], ['통계 카드', 'Stat card', '오늘 집중, 세션 수, 이번 주', 'stat', '#st .stat']],
+  openclose: [['탭', 'Tab', '하루 열기 / 하루 닫기 화면 전환', 'seg', '#tabs'], ['체크리스트', 'Checklist', '시작 의식, 마무리 체크', 'checklist', '.items'], ['입력창', 'Input', '잘한 일, 아쉬운 일, 내일 첫 할 일 (하루 닫기 탭)', 'input', '.input[data-a]'], ['비활성 상태', 'Disabled state', '회색으로 눌리지 않는 버튼. 다 채우기 전 퇴근 버튼 (하루 닫기 탭)', 'disabled', '#off'], ['확인 단계', 'Confirm', '다시 일하기 전에 한 번 더 묻기 (퇴근 후)', 'confirm', '#back2']],
+  cowork: [['카드 그리드', 'Card grid', '같은 모양 카드를 격자로 늘어놓은 것. 자리 6개', 'cardgrid', '#room'], ['상태 점', 'Status dot', '작업 중 파랑, 자리 비움 회색', 'dot', '.sdot'], ['실시간 타이머', 'Live timer', '1초마다 올라가는 작업 시간', 'live', '.seat .label'], ['안내 카드', 'Info card', '아티팩트로 만들면 진짜 같이 쓸 수 있다는 설명', 'highlight', '.box.blue']],
+  tracker: [['토글 버튼', 'Toggle button', '누르면 기록 시작, 다른 걸 누르면 전환되는 버튼 4개', 'toggle', '.trk-b'], ['타임라인', 'Timeline', '오늘 하루를 가로 막대 위에 시간 순서로 칠한 그림', 'timeline', '#tl'], ['리스트', 'List', '시작·끝 시각이 붙은 기록', 'list', '#log'], ['요약 카드', 'Summary card', '이번 주 종류별 합계', 'summary', '.box.blue']],
+  streak: [['히트맵', 'Heatmap · 잔디 그래프', '날짜 칸을 격자로 깔고 한 날만 색칠하는 그림', 'heatmap', '.sc-grid'], ['칩', 'Chip', '알약 모양 버튼. 습관 고르기', 'chip', '#hs button'], ['버튼', 'Button', '오늘 칸 채우기', 'button', '#today'], ['통계 카드', 'Stat card', '전체 채운 날, 이번 달, 이어지는 날', 'stat', '.stats .stat']],
+  done: [['큰 숫자', 'Big number', '오늘 해낸 개수', 'bignum', '.big'], ['입력창', 'Input', '끝낸 일 적기', 'input', '#f input'], ['리스트', 'List', '시각이 붙은 오늘 기록', 'list', '.items'], ['막대그래프', 'Bar chart', '세로 막대 높이로 날짜별 개수를 비교하는 그래프', 'bar', '.dbars']],
+  condition: [['시간 선택', 'Time picker', '시와 분을 고르는 칸. 잠든 시각, 일어난 시각', 'time', 'input[type=time]'], ['세그먼트 컨트롤', 'Segmented control', '한 줄 버튼 중 하나만 고르기. 컨디션 다섯 단계', 'seg', '#cs'], ['가로 막대', 'Horizontal bar', '옆으로 긴 막대 길이로 날짜별 수면 시간 비교', 'hbar', '.cd-bar'], ['태그', 'Tag', '날짜별 컨디션', 'tag', '.cd-row .tag'], ['통계 카드', 'Stat card', '평균 수면, 컨디션 비교', 'stat', '.stats .stat']],
+  estimate: [['통계 카드', 'Stat card', '내 평균 배율', 'stat', '.cols2 .box.gray'], ['계산기', 'Calculator', '숫자를 넣으면 바로 보정 시간이 나오는 칸', 'calc', '.cols2 .box.blue'], ['리스트', 'List', '할 일별 예상과 실제', 'list', '.items'], ['폼', 'Form', '할 일, 예상, 실제를 한 줄에 넣는 입력 묶음', 'form', '#f']],
+  review: [['통계 카드', 'Stat card · KPI', '이번 주 숫자 네 개', 'stat', '.rv-stats'], ['칸반형 보드', 'Kanban-style board', '세로 칸을 나란히 두고 메모를 붙이는 판', 'board', '.kpt'], ['리스트', 'List', '칸마다 메모', 'list', '.kc .items'], ['입력창', 'Input', '칸 아래에서 Enter로 메모 추가', 'input', '.kc .input']],
+  breakmenu: [['세그먼트 컨트롤', 'Segmented control', '5분, 15분, 30분 중 하나 고르기', 'seg', '#tabs'], ['리스트', 'List', '휴식 메뉴', 'list', '.items'], ['랜덤 뽑기', 'Random pick', '아무거나 골라줘 버튼', 'random', '#any'], ['강조 카드', 'Highlight card', '고른 휴식과 카운트다운 타이머 (메뉴를 고르면 나와요)', 'highlight', '.box.blue']],
+  sns: [['숫자 입력', 'Number input', '하루 예산(분)', 'number', '#bud'], ['큰 숫자', 'Big number', '남은 시간', 'bignum', '#left'], ['진행바', 'Progress bar', '줄어드는 예산. 5분 이하면 빨간색', 'progress', '#bw'], ['토글 버튼', 'Toggle button', 'SNS 보는 중 / 그만 보기', 'toggle', '#go'], ['리스트', 'List', '오늘 쓴 기록', 'list', '#log']]
+};
+
+/* 부품 미니 그림 */
+const THUMB = (() => {
+  const B = '#3182F6', L = '#90C2FF', G = '#C5CCD3', W = '#fff', D = '#191F28';
+  const r = (w, h, bg, x = '') => `<i style="width:${w}px;height:${h}px;background:${bg};border-radius:3px;${x}"></i>`;
+  const f = (a, dir = 'column', gap = 3, x = '') => `<i style="display:flex;flex-direction:${dir};gap:${gap}px;align-items:center;${x}">${a.join('')}</i>`;
+  const t = (txt, x = '') => `<i style="font-size:10px;font-weight:700;line-height:1;white-space:nowrap;${x}">${txt}</i>`;
+  const box = 'background:#fff;border-radius:4px;padding:4px 6px;box-shadow:inset 0 0 0 1.5px ' + G;
+  const cells = (n, cols, fn, size = 7) => `<i style="display:grid;grid-template-columns:repeat(${cols},${size}px);gap:2px">${Array.from({ length: n }, (_, i) => r(size, size, fn(i), 'border-radius:2px')).join('')}</i>`;
+  return {
+    input: t('입력…', box + ';color:#8B95A1;width:42px'),
+    list: f([r(42, 6, W), r(42, 6, W), r(42, 6, W)]),
+    button: t('버튼', `background:${B};color:#fff;border-radius:5px;padding:4px 8px`),
+    card: f([r(18, 24, W), r(18, 24, W), r(18, 24, W)], 'row'),
+    empty: t('비어 있음', 'color:#8B95A1;border:1.5px dashed ' + G + ';border-radius:4px;padding:5px 4px'),
+    stat: f([t('12', `${box.replace(G, 'transparent')};font-size:13px`), t('3', `${box.replace(G, 'transparent')};font-size:13px`)], 'row'),
+    tag: t('3일째', 'background:#FFEEEE;color:#F04452;border-radius:4px;padding:3px 5px'),
+    progress: `<i style="width:44px;height:7px;background:${W};border-radius:4px;overflow:hidden">${r(28, 7, B, 'border-radius:4px')}</i>`,
+    slider: `<i style="position:relative;width:44px;height:4px;background:${W};border-radius:2px">${r(24, 4, B, 'position:absolute;left:0;top:0')}${r(13, 13, W, `position:absolute;left:19px;top:-4.5px;border-radius:50%;box-shadow:0 0 0 2px ${B}`)}</i>`,
+    inline: t('목표 이름', `border-bottom:2px solid ${B};padding-bottom:2px`),
+    grid: cells(4, 2, () => W, 15),
+    select: t('선택 ▾', box),
+    checkbox: f([t('✓', `background:${B};color:#fff;width:14px;height:14px;border-radius:4px;display:grid;place-items:center`), r(22, 5, G)], 'row', 4),
+    section: f([r(16, 4, D, 'align-self:flex-start'), r(42, 7, W), r(42, 7, W)], 'column', 3, 'align-items:stretch'),
+    highlight: t('지금 할 것', `background:#E8F3FF;color:${B};border-radius:5px;padding:7px 5px`),
+    reorder: t('↑ ↓', 'font-size:14px;color:#4E5968'),
+    chip: f([t('A', `background:${D};color:#fff;border-radius:99px;padding:3px 7px`), t('B', `background:${W};color:#4E5968;border-radius:99px;padding:3px 7px`)], 'row'),
+    drag: f([r(9, 14, B), r(9, 14, B), r(9, 14, B), r(9, 14, W), t('☚', 'font-size:12px;margin-left:-14px;margin-top:10px')], 'row', 2),
+    toggle: f([t('ON', `background:${B};color:#fff;border-radius:5px;padding:3px 4px`), t('OFF', `background:${W};color:#8B95A1;border-radius:5px;padding:3px 4px`)], 'row'),
+    summary: f([f([r(18, 4, G), r(8, 4, D)], 'row', 14), f([r(18, 4, G), r(8, 4, D)], 'row', 14), f([r(18, 4, G), r(8, 4, D)], 'row', 14)]),
+    table: cells(12, 4, i => [0, 5, 6, 11].includes(i) ? B : W, 8),
+    badge: t('외주 <span style="color:#8B95A1">6</span>', `background:${W};border-radius:99px;padding:3px 7px`),
+    date: t('11/24 ▦', box),
+    counter: t('D-16', 'font-size:14px'),
+    alert: t('오늘 시작!', `background:#E8F3FF;color:${B};border-left:3px solid ${B};border-radius:3px;padding:5px 6px`),
+    number: t('3 ⇅', box),
+    bignum: t('21', 'font-size:20px'),
+    seg: `<i style="display:flex;gap:2px;background:#E5E8EB;border-radius:5px;padding:2px">${r(14, 12, W)}${r(14, 12, 'transparent')}${r(14, 12, 'transparent')}</i>`,
+    ring: r(24, 24, 'transparent', `border-radius:50%;border:4px solid ${B};border-right-color:${W};border-bottom-color:${W}`),
+    checklist: f([f([r(7, 7, B), r(26, 4, G)], 'row'), f([r(7, 7, B), r(26, 4, G)], 'row'), f([r(7, 7, W), r(26, 4, G)], 'row')]),
+    disabled: t('퇴근하기', `background:${W};color:#B0B8C1;border-radius:5px;padding:4px 6px`),
+    confirm: t('정말요?', box),
+    cardgrid: cells(6, 3, () => W, 11),
+    dot: f([r(8, 8, B, 'border-radius:50%'), r(8, 8, G, 'border-radius:50%')], 'row', 6),
+    live: t('12:03', 'font-size:13px'),
+    timeline: `<i style="display:flex;width:44px;height:10px;background:${W};border-radius:3px;overflow:hidden">${r(8, 10, 'transparent')}${r(14, 10, B, 'border-radius:0')}${r(6, 10, G, 'border-radius:0')}${r(10, 10, L, 'border-radius:0')}</i>`,
+    heatmap: cells(28, 7, i => [1, 2, 4, 7, 9, 10, 11, 15, 16, 18, 20, 22, 23, 25, 26].includes(i) ? B : W, 5),
+    bar: f([r(6, 10, L), r(6, 18, L), r(6, 8, L), r(6, 22, B)], 'row', 3, 'align-items:flex-end;height:24px'),
+    time: t('08:00', box),
+    hbar: f([r(36, 5, B, 'align-self:flex-start'), r(26, 5, '#F04452', 'align-self:flex-start'), r(40, 5, B, 'align-self:flex-start')], 'column', 3, 'align-items:stretch;width:42px'),
+    calc: t('×1.4', `color:${B};font-size:13px`),
+    form: f([r(16, 10, W), r(10, 10, W), r(10, 10, W), r(8, 10, B)], 'row', 2),
+    board: f([f([r(11, 6, '#CDEBC9'), r(11, 6, '#CDEBC9')], 'column', 2), f([r(11, 6, '#F6D3C6')], 'column', 2), f([r(11, 6, '#CBDDF6'), r(11, 6, '#CBDDF6')], 'column', 2)].map(x => x.replace('display:flex', `display:flex;background:${W};padding:2px;border-radius:3px;height:22px;justify-content:flex-start`)), 'row', 3),
+    random: t('?', `background:${B};color:#fff;border-radius:50%;width:20px;height:20px;display:grid;place-items:center;font-size:12px`)
+  };
+})();
+
+/* 비슷한 것: 생김새가 닮은 익숙한 물건·앱·화면, 그리고 무엇이 다른지 */
+const LOOKS = {
+  capture: '이메일 받은편지함을 보관함이나 휴지통으로 옮겨 비우는 것과 같은 구조예요. 그래서 "인박스(Inbox)"라고도 불러요. 메모 앱과 다른 점은 적어두고 끝이 아니라 반드시 분류해서 비운다는 거예요.',
+  waiting: '택배 배송 조회처럼 보낸 날부터 며칠째인지 세는 목록이에요. 할 일 목록과 생김새는 같지만 내가 할 일이 아니라 남이 해줘야 하는 일만 모아요.',
+  goals: '회사에서 쓰는 OKR 목표판과 비슷해요. OKR은 목표 하나에 숫자로 된 핵심 결과를 여러 개 붙이지만, 여기서는 진행률 하나로 단순하게 봐요.',
+  matrix: '2×2 표라서 "사분면 차트"라고도 불러요. 칸반처럼 할 일을 다른 칸으로 옮기지만, 칸반은 진행 단계(할 일·하는 중·끝)로 나누고 여기는 중요도로 나눠요.',
+  nine: '평범한 할 일 목록(투두 리스트)인데 칸 수가 처음부터 정해져 있는 형태예요. 일반 투두 앱은 끝없이 추가할 수 있다는 점이 달라요.',
+  breakdown: '체크리스트에 진행률을 붙인 모양이에요. 회사에서 쓰는 WBS(작업 분해 구조)나 마인드맵을 한 줄로 단순하게 만든 것과 같아요.',
+  dayplan: '구글 캘린더의 하루 보기처럼 세로 시간 축에 칸을 채우는 화면이에요. 캘린더는 약속만 적지만 여기서는 빈 시간까지 전부 칠해서 하루를 미리 짜요.',
+  weekly: '학교 시간표, 헬스장 주간 프로그램표와 같은 표예요. 캘린더는 날짜 기준이라 매주 새로 채워야 하지만, 이건 요일 기준이라 한 번 정하면 매주 똑같이 반복돼요.',
+  backward: '프로젝트 일정에 쓰는 간트 차트를 거꾸로 계산한 거예요. 간트 차트는 시작일부터 앞으로 쌓고, 역산은 마감일부터 뒤로 쌓아요.',
+  week168: '가계부의 한 달 예산표와 똑같은 구조예요. 돈 대신 시간을 항목별로 나누고, 총액이 168시간으로 정해져 있어요.',
+  timer: '주방 타이머와 스톱워치를 합친 거예요. 2분만과 25분 집중은 거꾸로 줄어드는 타이머, 끝날 때까지는 올라가는 스톱워치예요.',
+  openclose: '조종사의 이륙 전 체크리스트, 가게 마감 체크리스트와 같은 형태예요. 일반 할 일 목록과 달리 매일 같은 항목을 같은 순서로 반복해요.',
+  cowork: '유튜브의 "Study with me" 영상이나 공부 앱의 함께 공부방과 같은 방식이에요. 화상 회의처럼 말을 주고받지 않고 각자 일만 해요.',
+  tracker: '스톱워치를 일 종류별로 여러 개 둔 거예요. 토글(Toggl) 같은 시간 기록 앱이나 프리랜서 근무 시간 정산표와 같아요. 계획을 세우는 캘린더와 달리 이미 쓴 시간만 남겨요.',
+  streak: '깃허브 잔디, 듀오링고의 연속 학습일 표시와 같은 형태예요. 달력과 달리 몇 달치를 작은 칸으로 한눈에 봐서 빈칸과 채운 칸의 흐름이 보여요.',
+  done: '할 일 목록의 반대라서 "역 투두 리스트"라고도 불러요. 일기와 비슷하지만 감정이나 사건 대신 끝낸 일만 짧게 적어요.',
+  condition: '수면 앱이나 생리 주기 앱처럼 날마다 몇 가지만 골라 기록하는 트래커예요. 일기처럼 길게 쓰지 않고 숫자와 버튼으로만 남겨요.',
+  estimate: '개발팀에서 쓰는 "추정 vs 실적" 표와 같아요. 견적서를 쓰기 전에 지난 작업 기록을 보는 것과 같은 원리예요.',
+  review: '세 칸짜리 보드에 포스트잇을 붙이는 모양이라 칸반 보드와 생김새가 같아요. 칸반은 할 일 카드를 "할 일 → 하는 중 → 끝"으로 옮기면서 진행 상태를 보는 판이고, KPT는 지난 한 주를 돌아보며 메모를 적는 판이라 카드를 옮기지 않아요. 비슷한 회고 판으로 4L 회고(좋았던 것, 배운 것, 부족했던 것, 바랐던 것)도 있어요.',
+  breakmenu: '식당 메뉴판 모양 그대로예요. "아무거나" 버튼은 점심 메뉴 룰렛과 같은 랜덤 뽑기예요.',
+  sns: '휴대폰의 스크린 타임이나 앱 사용 시간 제한과 같아요. 휴대폰 기능은 시간이 되면 자동으로 막지만, 여기서는 직접 켜고 끄면서 쓰는 순간을 의식하게 해요.'
+};
+</script>
+<script>
+/* ---------- app shell ---------- */
+const STAGES = [
+  ['담기', '머릿속과 남에게 걸린 일을 꺼내 두기'],
+  ['고르기', '무엇이 중요한지 정하기'],
+  ['배치하기', '언제 할지 시간에 놓기'],
+  ['실행하기', '지금 이 시간을 붙잡기'],
+  ['기록하기', '지나간 시간을 눈에 보이게'],
+  ['돌아보기', '지난 시간에서 배우기'],
+  ['지키기', '쉼과 집중의 경계 지키기']
+];
+const WORRIES = ['시작이 어려움', '집중이 안 됨', '뭐부터 할지 모름', '꾸준히 못 함', '시간 감각이 없음', '쉬지를 못함', '성취감이 없음'];
+const ORDER = STAGES.flatMap(([s]) => TOOLS.filter(t => t.stage === s));
+let worry = null, q = '', cur = null;
+$('#total').textContent = TOOLS.length;
+const ok = t => (!worry || t.tags.includes(worry)) && (!q || (t.title + t.desc + t.oname).includes(q));
+function drawNav() {
+  $('#nav').innerHTML = STAGES.map(([s]) => {
+    const list = TOOLS.filter(t => t.stage === s && ok(t));
+    return list.length ? `<div><h3>${s}</h3>${list.map(t => `<a class="nl" href="#${t.slug}" ${cur === t ? 'aria-current="page"' : ''}>${esc(t.title)}</a>`).join('')}</div>` : '';
+  }).join('') || '<p class="none">맞는 도구가 없어요.</p>';
+}
+function drawHome() {
+  $('#worries').innerHTML = `<button data-w="" aria-pressed="${!worry}">전체</button>` +
+    WORRIES.map(w => `<button data-w="${w}" aria-pressed="${worry === w}">${w}</button>`).join('');
+  const html = STAGES.map(([s, d]) => {
+    const list = TOOLS.filter(t => t.stage === s && ok(t));
+    if (!list.length) return '';
+    return `<section class="panel group"><h2>${s}</h2><p>${d}</p><div class="tgrid">${list.map(t =>
+      `<a class="tcard" href="#${t.slug}"><b>${esc(t.title)}</b><span>${esc(t.desc)}</span></a>`).join('')}</div></section>`;
+  }).join('');
+  $('#groups').innerHTML = html || '<section class="panel"><p class="empty">맞는 도구가 없어요. 다른 고민을 골라보세요.</p></section>';
+}
+$('#worries').onclick = e => { const b = e.target.closest('button'); if (!b) return; worry = b.dataset.w || null; drawHome(); drawNav(); };
+$('#q').oninput = e => { q = e.target.value.trim(); drawNav(); if (!cur) drawHome(); };
+
+function mount(t) {
+  clearTimers();
+  const old = $('#demo'), box = old.cloneNode(false); old.replaceWith(box);
+  let S = t.seed ? store.get(t.slug, null) : null;
+  if (t.seed && S == null) { S = t.seed(); store.set(t.slug, S); }
+  t.render(box, S, () => store.set(t.slug, S));
+}
+function route() {
+  const t = TOOLS.find(x => x.slug === decodeURIComponent(location.hash.slice(1)));
+  clearTimers();
+  cur = t || null;
+  $('#app').classList.toggle('home', !t);
+  $('#home').hidden = !!t; $('#detail').hidden = !t; $('#rail').hidden = !t;
+  if (t) {
+    $('#d-stage').textContent = t.stage; $('#d-title').textContent = t.title; $('#d-lede').textContent = t.lede;
+    $('#d-why').textContent = t.why; $('#d-oname').textContent = t.oname; $('#d-origin').textContent = t.origin; $('#d-looks').textContent = LOOKS[t.slug] || '';
+    $('#d-prompt').textContent = t.prompt;
+    $('#d-parts').innerHTML = (PARTS[t.slug] || []).map(([n, en, w, k, sel], i) => `<li><button class="part" data-sel="${esc(sel)}"><span class="th" aria-hidden="true">${THUMB[k] || ''}</span><span class="pt"><span class="pn"><b>${n}</b><span class="tag">${en}</span></span><span class="pw">${w}</span><span class="pmiss" hidden>지금 화면에는 없어요. 위 설명대로 하면 나타나요.</span></span></button></li>`).join(''); $('#copy').textContent = '문장 복사하기';
+    $('#reset').hidden = !t.empty;
+    const i = ORDER.indexOf(t);
+    $('#prev').disabled = i <= 0; $('#next').disabled = i >= ORDER.length - 1;
+    document.title = t.title + ' · 시간관리 도구 체험관';
+    mount(t);
+  } else {
+    $('#demo').innerHTML = '';
+    document.title = '시간관리 도구 체험관';
+    drawHome();
+  }
+  drawNav();
+  scrollTo(0, 0);
+}
+$('#brand').onclick = $('#back').onclick = () => { location.hash = ''; };
+$('#prev').onclick = () => { const i = ORDER.indexOf(cur); if (i > 0) location.hash = ORDER[i - 1].slug; };
+$('#next').onclick = () => { const i = ORDER.indexOf(cur); if (i < ORDER.length - 1) location.hash = ORDER[i + 1].slug; };
+$('#reset').onclick = () => { if (!cur || !cur.empty) return; store.set(cur.slug, cur.empty()); mount(cur); };
+let hlT = null;
+const hl = (btn, on, scroll) => {
+  $$('.hl').forEach(e => e.classList.remove('hl')); $$('.part.on').forEach(e => e.classList.remove('on'));
+  if (!on) return;
+  const els = $$(btn.dataset.sel, $('#demo')).filter(e => e.offsetParent !== null);
+  $('.pmiss', btn).hidden = !!els.length;
+  if (!els.length) return;
+  btn.classList.add('on'); els.slice(0, 12).forEach(e => e.classList.add('hl'));
+  if (scroll) { const r = els[0].getBoundingClientRect(); if (r.top < 60 || r.bottom > innerHeight - 40) els[0].scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+};
+$('#d-parts').addEventListener('click', e => { const b = e.target.closest('.part'); if (!b) return; clearTimeout(hlT); hl(b, true, true); hlT = setTimeout(() => hl(b, false), 3200); });
+$('#d-parts').addEventListener('mouseover', e => { const b = e.target.closest('.part'); if (b && !b.classList.contains('on')) { clearTimeout(hlT); hl(b, true, false); } });
+$('#d-parts').addEventListener('mouseleave', () => { hlT = setTimeout(() => $$('.hl').forEach(e => e.classList.remove('hl')) || $$('.part.on').forEach(e => e.classList.remove('on')), 300); });
+$('#copy').onclick = () => {
+  const b = $('#copy'), txt = $('#d-prompt').textContent;
+  const done = () => { b.textContent = '복사했어요'; setTimeout(() => b.textContent = '문장 복사하기', 1600); };
+  const fb = () => { const r = document.createRange(); r.selectNodeContents($('#d-prompt')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = '선택했어요. Ctrl+C로 복사하세요'; };
+  try { navigator.clipboard.writeText(txt).then(done, fb); } catch (e) { fb(); }
+};
+addEventListener('hashchange', route);
+route();
+</script>
+</body></html>
